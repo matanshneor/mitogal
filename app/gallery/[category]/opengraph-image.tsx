@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import {
   loadHebrewFont,
   logoDataUri,
+  LOGO_ASPECT,
   rtl,
   OG,
   OG_SIZE,
@@ -75,14 +76,34 @@ export default async function Image({
           }}
         />
 
-        {logo ? (
-           
-          <img src={logo} alt="" width={200} height={193} />
-        ) : (
-          <div style={{ fontSize: 40, color: OG.ink, display: "flex" }}>
-            {rtl(OG.site.name)}
+        {/* Script as an image, tagline as text — the header's construction. */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          {logo ? (
+            <img src={logo} alt="" width={220} height={220 / LOGO_ASPECT} />
+          ) : (
+            <div style={{ fontSize: 40, color: OG.ink, display: "flex" }}>
+              {rtl(OG.site.name)}
+            </div>
+          )}
+          <div
+            style={{
+              marginTop: 7,
+              fontSize: 17,
+              fontWeight: 700,
+              letterSpacing: 3.4,
+              color: OG.taglineInk,
+              display: "flex",
+            }}
+          >
+            {rtl(OG.site.tagline)}
           </div>
-        )}
+        </div>
 
         <div
           style={{

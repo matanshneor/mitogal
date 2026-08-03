@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import {
   loadHebrewFont,
   logoDataUri,
+  LOGO_ASPECT,
   rtl,
   OG,
   OG_SIZE,
@@ -55,14 +56,34 @@ export default async function Image() {
           }}
         />
 
-        {logo ? (
-           
-          <img src={logo} alt="" width={230} height={222} />
-        ) : (
-          <div style={{ fontSize: 44, color: OG.ink, display: "flex" }}>
-            {rtl(OG.site.name)}
+        {/* Script as an image, tagline as text — the header's construction. */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          {logo ? (
+            <img src={logo} alt="" width={260} height={260 / LOGO_ASPECT} />
+          ) : (
+            <div style={{ fontSize: 44, color: OG.ink, display: "flex" }}>
+              {rtl(OG.site.name)}
+            </div>
+          )}
+          <div
+            style={{
+              marginTop: 8,
+              fontSize: 20,
+              fontWeight: 700,
+              letterSpacing: 4,
+              color: OG.taglineInk,
+              display: "flex",
+            }}
+          >
+            {rtl(OG.site.tagline)}
           </div>
-        )}
+        </div>
 
         <div
           style={{

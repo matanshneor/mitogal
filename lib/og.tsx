@@ -32,10 +32,21 @@ export async function loadHebrewFont(): Promise<ArrayBuffer | null> {
   }
 }
 
-/** Reads the logo PNG as a data URI so Satori can embed it. */
+/**
+ * Reads the "MitoGal" script as a data URI so Satori can embed it.
+ *
+ * Deliberately the script file and not `logo.png`: the full mark still carries
+ * the tagline baked into the JPEG, where it is 25px tall and smeared by
+ * compression. The card renders the tagline as text underneath instead, the
+ * same way the site header does.
+ */
+export const LOGO_ASPECT = 316 / 73;
+
 export async function logoDataUri(): Promise<string | null> {
   try {
-    const buf = await readFile(path.join(process.cwd(), "public/logo.png"));
+    const buf = await readFile(
+      path.join(process.cwd(), "public/logo-script.png")
+    );
     return `data:image/png;base64,${buf.toString("base64")}`;
   } catch {
     return null;
@@ -62,6 +73,8 @@ export const OG = {
   paper: "#F7F9F9",
   ink: "#15191A",
   muted: "#66716F",
+  /** The header's tagline colour — ink at 75% over paper, resolved. */
+  taglineInk: "#4E5152",
   brand: "#6ED7D8",
   brandDeep: "#3C7677",
   site,
