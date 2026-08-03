@@ -1,0 +1,183 @@
+@import "tailwindcss";
+
+/*
+ * מיתוגל — "בית דפוס" design tokens.
+ *
+ * Gal prints, cuts, folds and packs. The site should feel like a print
+ * designer's worktable: warm paper, saturated inks, die-cut rounded corners,
+ * and arches borrowed from balloon arches.
+ *
+ * Tailwind v4 is CSS-first — these @theme variables generate the utilities
+ * (bg-paper, text-ink, bg-cat-weddings, font-display, shadow-ink, ...).
+ * There is no tailwind.config.js. Change colors here and nowhere else.
+ *
+ * CONTRAST: every pair below was verified against WCAG AA (see the palette
+ * check in the project notes). The system deliberately puts INK text on the
+ * vivid category fills — white-on-color fails almost every time at these
+ * saturations, ink-on-color passes at 4.5:1+ while staying genuinely vivid.
+ */
+@theme {
+  /* ── Base ───────────────────────────────────────────────────────────── */
+  /* Cool off-white, sampled to sit under the logo's watercolour wash. A warm
+     cream fought the cool turquoise in the mark. */
+  --color-paper: #f7f9f9;
+  --color-surface: #ffffff;
+  --color-ink: #15191a; /* the logo's black is #090909 — near-neutral */
+  --color-muted: #66716f; /* 4.78:1 on paper */
+  --color-line: #e1e7e7;
+
+  /* ── Brand: taken from the logo, not invented ───────────────────────── */
+  /* #6ED7D8 is sampled straight out of the "Gal" in Gal's own wordmark.
+     It is light, so it is a FILL colour only — always with ink text (10.4:1).
+     `-deep` is the version that carries white text and works as a text
+     colour on paper (5.19:1 / 4.91:1). */
+  --color-brand: #6ed7d8;
+  --color-brand-deep: #3c7677;
+  --color-brand-tint: #e9f9f9;
+
+  /* ── One colour per event category ──────────────────────────────────── */
+  /* vivid = large fills, always with ink text (5:1+)
+     deep  = small text / white-on-colour (4.9:1+ both ways)
+     tint  = section backgrounds with ink text (15:1+)
+     Warm hues throughout, so they read as a family against the cool brand.
+     Holidays is green rather than teal so it can't be mistaken for the
+     brand colour. */
+
+  --color-cat-weddings: #e8a0ae;
+  --color-cat-weddings-deep: #8c6169;
+  --color-cat-weddings-tint: #fcf4f5;
+
+  --color-cat-gifts: #f5906b;
+  --color-cat-gifts-deep: #9d5c44;
+  --color-cat-gifts-tint: #fef2ed;
+
+  --color-cat-proposals: #de6088;
+  --color-cat-proposals-deep: #ae4b6b;
+  --color-cat-proposals-tint: #fbecf1;
+
+  --color-cat-birthdays: #f5c25a;
+  --color-cat-birthdays-deep: #846931;
+  --color-cat-birthdays-tint: #fef8eb;
+
+  --color-cat-holidays: #7cc98d;
+  --color-cat-holidays-deep: #497753;
+  --color-cat-holidays-tint: #eff9f1;
+
+  --color-cat-concept: #8e9be0;
+  --color-cat-concept-deep: #616a99;
+  --color-cat-concept-tint: #f1f3fb;
+
+  --color-whatsapp: #25d366;
+
+  /* ── Type ───────────────────────────────────────────────────────────── */
+  --font-display: var(--font-fredoka), system-ui, sans-serif;
+  --font-body: var(--font-assistant), system-ui, sans-serif;
+
+  /* A real scale with a filled-in middle. The previous design had nothing
+     between the h1 and 16px body, which is what made it read as flat. */
+  --text-display: clamp(2.75rem, 9vw, 5.5rem);
+  --text-display--line-height: 1.02;
+  --text-display--letter-spacing: -0.02em;
+
+  --text-h1: clamp(2rem, 5vw, 3.25rem);
+  --text-h1--line-height: 1.12;
+  --text-h1--letter-spacing: -0.01em;
+
+  --text-h2: clamp(1.5rem, 3vw, 2.25rem);
+  --text-h2--line-height: 1.2;
+
+  --text-h3: 1.25rem;
+  --text-h3--line-height: 1.35;
+
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.7;
+
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.4;
+  --text-label--letter-spacing: 0.06em;
+
+  /* ── Shape & depth ──────────────────────────────────────────────────── */
+  /* Shadows carry the hue of the thing casting them, like ink bleeding into
+     paper. Never a neutral grey drop shadow. */
+  --shadow-ink: 0 12px 32px rgba(21, 25, 26, 0.08);
+  --shadow-ink-lg: 0 24px 56px rgba(21, 25, 26, 0.12);
+  --shadow-brand: 0 12px 32px rgba(60, 118, 119, 0.22);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5.5rem;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Hebrew needs generous leading. */
+  p {
+    line-height: 1.7;
+  }
+
+  :focus-visible {
+    /* The light brand turquoise is too pale to read as a focus ring, so the
+       ring uses the deep variant. */
+    outline: 3px solid var(--color-brand-deep);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  select {
+    appearance: none;
+  }
+}
+
+@utility arch {
+  /* The balloon arch — the site's structural motif for key imagery. */
+  border-radius: 999px 999px 1.5rem 1.5rem;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* The signature marquee.
+ *
+ * The track renders its content twice and slides exactly half its own width,
+ * so the second copy lands where the first began and the loop is seamless.
+ *
+ * The track must be `dir="ltr"` for this to work. Inside the page's RTL
+ * context the track's box is anchored to the right and overflows leftward, so
+ * a negative translate walked it off-screen instead of cycling — the strip
+ * emptied out a few seconds in. Forcing LTR anchors it at the left edge and
+ * makes translateX predictable. Each Hebrew label still renders correctly on
+ * its own; only the order of the items follows the track's direction. */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
