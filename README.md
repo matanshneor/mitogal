@@ -44,6 +44,19 @@ Railway → השירות → **Settings → Networking** → עריכת הדומ
 
 המשתנים עצמם מתעדכנים לבד, כי הם מפנים ל-`RAILWAY_PUBLIC_DOMAIN`.
 
+### חיבור הגלריה לגיטהאב (חד-פעמי)
+
+כדי שהשרת יוכל לשמור תמונות, הוא צריך אישור לכתוב לריפו, והאישור הזה צריך להיות **רק לריפו הזה**:
+
+1. github.com → תמונת הפרופיל → **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens** → **Generate new token**
+2. **Token name:** `mitogal-gallery` · **Expiration:** לבחור תאריך רחוק, ולשים תזכורת לחדש
+3. **Repository access:** **Only select repositories** → `mitogal`
+4. **Permissions** → **Repository permissions** → **Contents:** **Read and write**
+5. **Generate token** → להעתיק
+6. Railway → `backend` → **Variables** → **New Variable**: `GITHUB_TOKEN` = הטוקן → **Deploy**
+
+כשהטוקן פג, לשונית הגלריה מציגה שגיאה. יוצרים טוקן חדש ומחליפים בשלב 6.
+
 ---
 
 ## מה הבקנד עושה
@@ -54,9 +67,24 @@ Railway → השירות → **Settings → Networking** → עריכת הדומ
 | `POST /api/admin/login` | עמוד `/admin` | בודק סיסמה ומחזיר חיבור ל-12 שעות. 5 ניסיונות שגויים חוסמים ל-15 דקות |
 | `GET /api/admin/leads` | עמוד `/admin` | 500 הפניות האחרונות |
 | `PATCH /api/admin/leads/:id` | עמוד `/admin` | מסמן פנייה כ"טופלה" או מחזיר אותה ל"חדשה" |
+| `GET/POST /api/admin/gallery` | `/admin` → גלריה | רשימת התמונות / העלאה (עד 10, עד 25MB כל אחת) |
+| `PATCH/DELETE /api/admin/gallery/:id` | `/admin` → גלריה | עריכת תיאור או קטגוריה / מחיקה |
+| `PUT /api/admin/gallery/order` | `/admin` → גלריה | שמירת סדר חדש |
 | `GET /health` | Railway | בודק שהשרת ומסד הנתונים פועלים |
 
 הטבלה נוצרת אוטומטית בהפעלה הראשונה. אין צורך להריץ מיגרציות.
+
+### איך עובד ניהול הגלריה
+
+התמונות **לא** נשמרות במסד הנתונים ולא באחסון בתשלום. הן נשמרות בריפו, בדיוק כמו קודם:
+
+1. גל מעלה תמונה ב-`/admin` → גלריה.
+2. השרת מקטין אותה (עד 1600px בצלע הארוכה, JPEG), מסובב לפי הטלפון ומוחק מידע מוסתר כמו מיקום GPS.
+3. השרת עושה **קומיט אחד** לגיטהאב, עם התמונה ועם [`frontend/data/gallery.json`](frontend/data/gallery.json) המעודכן.
+4. Railway רואה את הקומיט ובונה את האתר מחדש. אחרי כ-3 דקות התמונה באוויר.
+
+אם מישהו דחף לגיטהאב באותו רגע, השרת מנסה שוב על הגרסה החדשה ולא דורס אותה.
+אפשר להמשיך לערוך את `gallery.json` גם ידנית.
 
 ---
 
@@ -113,6 +141,7 @@ DATABASE_URL     = ${{Postgres.DATABASE_URL}}
 CORS_ORIGINS     = https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}
 ADMIN_PASSWORD   = <הסיסמה של גל, לפחות 10 תווים>
 SESSION_SECRET   = <מחרוזת אקראית: openssl rand -base64 48>
+GITHUB_TOKEN     = <טוקן גיטהאב, ראו "חיבור הגלריה לגיטהאב">
 ```
 
 ### 3. שירות הפרונטנד

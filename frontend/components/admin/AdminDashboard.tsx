@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, LogOut, MessageCircle, Phone, RefreshCw, RotateCcw } from "lucide-react";
+import { Check, Images, Inbox, LogOut, MessageCircle, Phone, RefreshCw, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useState, useSyncExternalStore, type FormEvent } from "react";
 import {
   API_URL,
@@ -11,17 +11,10 @@ import {
   type Lead,
 } from "@/lib/api";
 import { site } from "@/lib/site.config";
+import GalleryManager from "./GalleryManager";
+import { CHIP, FIELD, GHOST, PRIMARY } from "./styles";
 
 const TOKEN_KEY = "mitogal-admin-token";
-
-const FIELD =
-  "min-h-12 w-full border-0 border-b-2 border-line bg-transparent px-0 pb-2 text-base text-ink transition-colors focus:border-brand-deep focus:outline-none";
-
-const PRIMARY =
-  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-brand px-6 font-display text-base font-semibold text-ink shadow-brand transition-all hover:brightness-105 disabled:opacity-60";
-
-const GHOST =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-full border-2 border-line px-4 text-sm font-semibold text-ink transition-colors hover:border-brand-deep";
 
 type Filter = "new" | "contacted" | "all";
 
@@ -102,17 +95,62 @@ export default function AdminDashboard() {
   if (token === undefined) return null;
 
   return (
-    <section className="mx-auto min-h-[70svh] max-w-[900px] px-4 py-16 sm:px-6 sm:py-24">
+    <section className="mx-auto min-h-[70svh] max-w-[900px] px-4 pb-16 pt-28 sm:px-6 sm:pb-24 sm:pt-32">
       {!API_URL ? (
         <p className="rounded-[1rem] bg-cat-proposals-tint px-4 py-3 text-ink">
           חסר המשתנה <code dir="ltr">NEXT_PUBLIC_API_URL</code> — הגדירו אותו ובנו מחדש.
         </p>
       ) : token ? (
-        <LeadsView token={token} onSignOut={signOut} />
+        <AdminShell token={token} onSignOut={signOut} />
       ) : (
         <LoginForm onLogin={writeToken} />
       )}
     </section>
+  );
+}
+
+type Section = "leads" | "gallery";
+
+function AdminShell({ token, onSignOut }: { token: string; onSignOut: () => void }) {
+  const [section, setSection] = useState<Section>("leads");
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <nav aria-label="ניהול" className="flex gap-2">
+          <button
+            type="button"
+            aria-current={section === "leads" ? "page" : undefined}
+            onClick={() => setSection("leads")}
+            className={`${CHIP(section === "leads")} inline-flex items-center gap-2`}
+          >
+            <Inbox className="h-4 w-4" aria-hidden="true" />
+            פניות
+          </button>
+          <button
+            type="button"
+            aria-current={section === "gallery" ? "page" : undefined}
+            onClick={() => setSection("gallery")}
+            className={`${CHIP(section === "gallery")} inline-flex items-center gap-2`}
+          >
+            <Images className="h-4 w-4" aria-hidden="true" />
+            גלריה
+          </button>
+        </nav>
+        <button type="button" onClick={onSignOut} className={GHOST}>
+          <LogOut className="h-4 w-4" aria-hidden="true" />
+          יציאה
+        </button>
+      </div>
+
+      <div className="mt-10">
+        {section === "leads" ? (
+          <LeadsView token={token} onSignOut={onSignOut} />
+        ) : (
+          <GalleryManager token={token} onSignOut={onSignOut} />
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -230,16 +268,10 @@ function LeadsView({ token, onSignOut }: { token: string; onSignOut: () => void 
           <p className="text-label font-semibold uppercase text-muted">{site.name}</p>
           <h1 className="mt-1 font-display text-h1 font-semibold text-ink">פניות מהאתר</h1>
         </div>
-        <div className="flex gap-2">
-          <button type="button" onClick={refresh} disabled={loading} className={GHOST}>
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} aria-hidden="true" />
-            רענון
-          </button>
-          <button type="button" onClick={onSignOut} className={GHOST}>
-            <LogOut className="h-4 w-4" aria-hidden="true" />
-            יציאה
-          </button>
-        </div>
+        <button type="button" onClick={refresh} disabled={loading} className={GHOST}>
+          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} aria-hidden="true" />
+          רענון
+        </button>
       </div>
 
       <div role="tablist" aria-label="סינון פניות" className="mt-8 flex flex-wrap gap-2">
@@ -250,9 +282,7 @@ function LeadsView({ token, onSignOut }: { token: string; onSignOut: () => void 
             role="tab"
             aria-selected={filter === f.value}
             onClick={() => setFilter(f.value)}
-            className={`min-h-11 rounded-full px-4 text-sm font-semibold transition-colors ${
-              filter === f.value ? "bg-ink text-white" : "bg-surface text-ink hover:bg-brand-tint"
-            }`}
+            className={CHIP(filter === f.value)}
           >
             {f.label} <span className="tabular-nums opacity-70">({counts[f.value]})</span>
           </button>

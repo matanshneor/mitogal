@@ -41,6 +41,18 @@ const schema = z.object({
 
   /** Signs admin session tokens. Any long random string. */
   SESSION_SECRET: z.string().min(32, "SESSION_SECRET must be at least 32 characters"),
+
+  /**
+   * Gallery management commits photos to the repo, and Railway redeploys the
+   * frontend from that commit. A fine-grained token scoped to this one repo
+   * with "Contents: Read and write". Optional: without it the server runs and
+   * only the gallery endpoints answer 503.
+   */
+  GITHUB_TOKEN: z.string().min(1).optional(),
+  GITHUB_REPO: z.string().regex(/^[\w.-]+\/[\w.-]+$/).default("matanshneor/mitogal"),
+  GITHUB_BRANCH: z.string().min(1).default("main"),
+  /** Overridable only so tests can point at a fake GitHub. */
+  GITHUB_API_URL: z.string().url().default("https://api.github.com"),
 });
 
 const parsed = schema.safeParse(process.env);

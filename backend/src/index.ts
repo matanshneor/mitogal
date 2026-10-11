@@ -4,6 +4,7 @@ import helmet from "helmet";
 import { migrate, pool } from "./db.js";
 import { env } from "./env.js";
 import { adminRouter } from "./routes/admin.js";
+import { galleryRouter } from "./routes/gallery.js";
 import { leadsRouter } from "./routes/leads.js";
 
 const app = express();
@@ -13,7 +14,7 @@ const app = express();
 app.set("trust proxy", 1);
 
 app.use(helmet());
-app.use(cors({ origin: env.CORS_ORIGINS, methods: ["GET", "POST", "PATCH"] }));
+app.use(cors({ origin: env.CORS_ORIGINS, methods: ["GET", "POST", "PATCH", "PUT", "DELETE"] }));
 app.use(express.json({ limit: "16kb" }));
 
 /** Railway's healthcheck. Also confirms the database is reachable. */
@@ -27,6 +28,7 @@ app.get("/health", async (_req, res) => {
 });
 
 app.use("/api/leads", leadsRouter);
+app.use("/api/admin/gallery", galleryRouter);
 app.use("/api/admin", adminRouter);
 
 app.use((_req, res) => {

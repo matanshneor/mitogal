@@ -2,7 +2,7 @@
  * Fails the build if the photo folder and the gallery manifest disagree.
  *
  * This exists because a photo once vanished from the site silently: a script
- * that reordered data/gallery.ts dropped one entry, the file stayed on disk,
+ * that reordered the manifest dropped one entry, the file stayed on disk,
  * and nothing anywhere complained. A missing photo is invisible — there is no
  * error, no gap, just one less piece of work on display.
  *
@@ -15,13 +15,15 @@
 import { readdirSync, readFileSync } from "node:fs";
 
 const DIR = "public/images/portfolio";
-const MANIFEST = "data/gallery.ts";
+const MANIFEST = "data/gallery.json";
+const PREFIX = "/images/portfolio/";
 
-const source = readFileSync(MANIFEST, "utf8");
+const items = JSON.parse(readFileSync(MANIFEST, "utf8"));
 const referenced = new Set(
-  [...source.matchAll(/\$\{P\}\/([\w.-]+\.(?:jpg|jpeg|png|webp|avif))/g)].map(
-    (m) => m[1]
-  )
+  items
+    .map((item) => item.src)
+    .filter((src) => typeof src === "string" && src.startsWith(PREFIX))
+    .map((src) => src.slice(PREFIX.length))
 );
 const onDisk = new Set(
   readdirSync(DIR).filter((f) => /\.(jpe?g|png|webp|avif)$/i.test(f))

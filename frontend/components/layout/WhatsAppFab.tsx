@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { MessageCircle } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { waDefaultMessage, waLink } from "@/lib/site.config";
 
 /**
@@ -13,6 +14,9 @@ import { waDefaultMessage, waLink } from "@/lib/site.config";
  */
 export default function WhatsAppFab() {
   const reduced = useReducedMotion();
+  // On /admin it would sit over the gallery's edit buttons, and Gal has no
+  // reason to message herself.
+  if (usePathname().startsWith("/admin")) return null;
 
   return (
     <div className="fixed bottom-4 left-4 z-50 print:hidden">

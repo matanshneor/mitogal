@@ -5,6 +5,7 @@
  * on the frontend service before the build runs — changing it later requires
  * a redeploy.
  */
+import type { GalleryItem } from "@/data/gallery";
 import type { LeadFields } from "@/lib/site.config";
 
 export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
@@ -41,17 +42,31 @@ export type Lead = {
 
 export class UnauthorizedError extends Error {}
 
+/** Carries the backend's error code (e.g. "file_too_large") for the UI to translate. */
+export class ApiError extends Error {
+  constructor(
+    readonly status: number,
+    readonly code: string,
+  ) {
+    super(code);
+  }
+}
+
 async function adminFetch<T>(path: string, token: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}/api/admin${path}`, {
     ...init,
     headers: {
-      "Content-Type": "application/json",
+      // FormData sets its own multipart Content-Type with the boundary.
+      ...(typeof init?.body === "string" ? { "Content-Type": "application/json" } : {}),
       Authorization: `Bearer ${token}`,
       ...init?.headers,
     },
   });
   if (res.status === 401) throw new UnauthorizedError();
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new ApiError(res.status, body.error ?? `http_${res.status}`);
+  }
   return res.json() as Promise<T>;
 }
 
@@ -76,4 +91,33 @@ export function setLeadStatus(token: string, id: string, status: Lead["status"])
     method: "PATCH",
     body: JSON.stringify({ status }),
   });
+}
+
+export type { GalleryItem };
+
+export function fetchGallery(token: string): Promise<{ items: GalleryItem[] }> {
+  return adminFetch("/gallery", token);
+}
+
+export function uploadPhotos(token: string, form: FormData): Promise<{ items: GalleryItem[] }> {
+  return adminFetch("/gallery", token, { method: "POST", body: form });
+}
+
+export function updatePhoto(
+  token: string,
+  id: string,
+  changes: { alt?: string; category?: string },
+): Promise<{ item: GalleryItem }> {
+  return adminFetch(`/gallery/${encodeURIComponent(id)}`, token, {
+    method: "PATCH",
+    body: JSON.stringify(changes),
+  });
+}
+
+export function deletePhoto(token: string, id: string): Promise<{ ok: true }> {
+  return adminFetch(`/gallery/${encodeURIComponent(id)}`, token, { method: "DELETE" });
+}
+
+export function saveGalleryOrder(token: string, ids: string[]): Promise<{ ok: true }> {
+  return adminFetch("/gallery/order", token, { method: "PUT", body: JSON.stringify({ ids }) });
 }

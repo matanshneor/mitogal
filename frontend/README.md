@@ -39,15 +39,18 @@ npm run check:images   # מאמת שתיקיית התמונות והמניפסט
 
 ### 2. תמונות
 
-כל 43 המשבצות בגלריה כבר מציגות עבודות אמיתיות של גל. להוספת תמונה:
+**הדרך הקלה:** `/admin` → **גלריה**. שם אפשר להעלות תמונות מהטלפון, לערוך תיאור
+וקטגוריה, למחוק ולשנות סדר. כל שינוי עולה לאוויר תוך כ-3 דקות (פירוט ב-[README הראשי](../README.md)).
+
+**ידנית:**
 
 1. שים את הקובץ ב-`public/images/portfolio/`
-2. הוסף שורה ב-[`data/gallery.ts`](data/gallery.ts)
+2. הוסף רשומה ב-[`data/gallery.json`](data/gallery.json). הסדר בקובץ הוא סדר התצוגה
 3. כתוב `alt` שמתאר את התמונה בפועל
 
-```ts
-{ id: "wed-09", category: "weddings", src: `${P}/wedding-09.jpg`, aspect: "tall",
-  alt: "שלט כניסה מעוצב לחתונה עם שמות בני הזוג" },
+```json
+{ "id": "wed-09", "category": "weddings", "src": "/images/portfolio/wedding-09.jpg",
+  "aspect": "tall", "alt": "שלט כניסה מעוצב לחתונה עם שמות בני הזוג" }
 ```
 
 `check:images` יפיל את הבנייה אם שכחת אחד משני הצעדים הראשונים.
@@ -93,9 +96,9 @@ components/
   layout/    Header · Footer · WhatsAppFab · SkipLink · Analytics
   sections/  Hero · Services · Portfolio · Process · About · Testimonials · Contact
   gallery/   FilterContext · GalleryGrid
-  admin/     AdminDashboard
+  admin/     AdminDashboard · GalleryManager
   ui/        SectionHeading · MediaTile · Reveal · Button · InstagramIcon
-data/        services · gallery · process · testimonials
+data/        services · gallery (.json + .ts) · process · testimonials
 lib/         site.config.ts · api.ts
 ```
 
@@ -119,7 +122,7 @@ lib/         site.config.ts · api.ts
 |---|---|
 | **המלצות אמיתיות** — הציטוטים הם טקסט לדוגמה. הייחוס תחת כל אחד אומר "דוגמה לטקסט", אז שום דבר לא מתחזה להמלצה אמיתית — אבל **אסור לתת להם שמות אמיתיים בלי ציטוט אמיתי** | `data/testimonials.ts` — החלף והפוך את `testimonialsArePlaceholder` ל-`false`, או הסר את הסקשן מ-`app/page.tsx` |
 | **טקסט "אודות"** — טיוטה שנכתבה לפי הביו באינסטגרם, לא המילים של גל | `components/sections/About.tsx` (מסומן ב-TODO) |
-| **טקסט חלופי (alt) כללי מדי** — בשלוש תמונות: con-6, con-7, con-8 | `data/gallery.ts` (מסומן בהערה בסוף הקובץ) |
+| **טקסט חלופי (alt) כללי מדי** — בשלוש תמונות: con-6, con-7, con-8 | `/admin` → גלריה → ✎ (ההערה בראש `data/gallery.ts`) |
 | **פורטרט של גל** — הפלייסהולדר היחיד שנשאר | `components/sections/About.tsx` |
 | **דומיין משלכם** (רשות) — כרגע `mitogal.up.railway.app` | [README הראשי](../README.md), סעיף "דומיין משלכם" |
 

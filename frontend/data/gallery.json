@@ -1,0 +1,303 @@
+[
+  {
+    "id": "wed-2",
+    "category": "weddings",
+    "src": "/images/portfolio/wedding2.jpg",
+    "aspect": "tall",
+    "alt": "עיצוב ומיתוג תפריטים לחתונה"
+  },
+  {
+    "id": "wed-3",
+    "category": "weddings",
+    "src": "/images/portfolio/wedding3.jpg",
+    "aspect": "wide",
+    "alt": "מיתוג מעמד טבעות לחתונה"
+  },
+  {
+    "id": "wed-1",
+    "category": "weddings",
+    "src": "/images/portfolio/wedding1.jpg",
+    "aspect": "wide",
+    "alt": "תפריט חתונה מודפס עם מונוגרם של בני הזוג, קשור בסרט אורגנזה ומונח על צלחת"
+  },
+  {
+    "id": "wed-4",
+    "category": "weddings",
+    "src": "/images/portfolio/wedding-gift1.jpg",
+    "aspect": "tall",
+    "alt": "מתנה ממותגת לאורחי החתונה"
+  },
+  {
+    "id": "prp-1",
+    "category": "proposals",
+    "src": "/images/portfolio/engagement1.jpg",
+    "aspect": "tall",
+    "alt": "עיצוב ומיתוג לאירוע אירוסין"
+  },
+  {
+    "id": "prp-2",
+    "category": "proposals",
+    "src": "/images/portfolio/engagement2.jpg",
+    "aspect": "tall",
+    "alt": "פרטי עיצוב אישיים לאירוע אירוסין"
+  },
+  {
+    "id": "prp-3",
+    "category": "proposals",
+    "src": "/images/portfolio/love-day-heart-box.jpg",
+    "aspect": "square",
+    "alt": "מארז מתוקים ממותג בקופסת לב ליום האהבה, עם עטיפות מודפסות ותמונות של בני הזוג"
+  },
+  {
+    "id": "prp-4",
+    "category": "proposals",
+    "src": "/images/portfolio/love-day2.jpg",
+    "aspect": "tall",
+    "alt": "עיצוב רומנטי ומיתוג ליום האהבה"
+  },
+  {
+    "id": "bd-1",
+    "category": "birthdays",
+    "src": "/images/portfolio/birthday1.jpg",
+    "aspect": "tall",
+    "alt": "אריזות חטיפים ממותגות ליום הולדת ראשון בעיצוב פו הדוב, עם שמות החוגגים"
+  },
+  {
+    "id": "bd-5",
+    "category": "birthdays",
+    "src": "/images/portfolio/birthday5.jpg",
+    "aspect": "tall",
+    "alt": "אריזות וכיבוד ממותגים ליום הולדת"
+  },
+  {
+    "id": "bd-4",
+    "category": "birthdays",
+    "src": "/images/portfolio/birthday4.jpg",
+    "aspect": "tall",
+    "alt": "עיצוב שולחן ומיתוג ליום הולדת"
+  },
+  {
+    "id": "bd-2",
+    "category": "birthdays",
+    "src": "/images/portfolio/birthday2.jpg",
+    "aspect": "tall",
+    "alt": "מיתוג מודפס ליום הולדת"
+  },
+  {
+    "id": "bd-7",
+    "category": "birthdays",
+    "src": "/images/portfolio/birthday7.jpg",
+    "aspect": "tall",
+    "alt": "פינת כיבוד ממותגת ליום הולדת"
+  },
+  {
+    "id": "bd-10",
+    "category": "birthdays",
+    "src": "/images/portfolio/birthday10.jpg",
+    "aspect": "tall",
+    "alt": "מתנות ואריזות ממותגות לאורחי יום ההולדת"
+  },
+  {
+    "id": "bd-3",
+    "category": "birthdays",
+    "src": "/images/portfolio/birthday3.jpg",
+    "aspect": "tall",
+    "alt": "פרטי עיצוב ממותגים למסיבת יום הולדת"
+  },
+  {
+    "id": "bd-6",
+    "category": "birthdays",
+    "src": "/images/portfolio/birthday6.jpg",
+    "aspect": "tall",
+    "alt": "מיתוג בהתאמה אישית למסיבת יום הולדת"
+  },
+  {
+    "id": "bd-8",
+    "category": "birthdays",
+    "src": "/images/portfolio/birthday8.jpg",
+    "aspect": "tall",
+    "alt": "פרטים מודפסים ליום הולדת בהתאמה אישית"
+  },
+  {
+    "id": "bd-9",
+    "category": "birthdays",
+    "src": "/images/portfolio/birthday9.jpg",
+    "aspect": "tall",
+    "alt": "עיצוב ומיתוג למסיבת יום הולדת"
+  },
+  {
+    "id": "bd-11",
+    "category": "birthdays",
+    "src": "/images/portfolio/birthday11.jpg",
+    "aspect": "tall",
+    "alt": "מיתוג מודפס בנושא שנבחר ליום ההולדת"
+  },
+  {
+    "id": "bd-12",
+    "category": "birthdays",
+    "src": "/images/portfolio/birthday12.jpg",
+    "aspect": "tall",
+    "alt": "פרטי עיצוב ליום הולדת בהתאמה אישית"
+  },
+  {
+    "id": "hol-3",
+    "category": "holidays",
+    "src": "/images/portfolio/holidays3.jpg",
+    "aspect": "tall",
+    "alt": "עיצוב חגיגי ומודפס לאירוע חג"
+  },
+  {
+    "id": "hol-4",
+    "category": "holidays",
+    "src": "/images/portfolio/holidays4.jpg",
+    "aspect": "tall",
+    "alt": "פרטי מיתוג לחג בהתאמה אישית"
+  },
+  {
+    "id": "hol-1",
+    "category": "holidays",
+    "src": "/images/portfolio/holidays1.jpg",
+    "aspect": "tall",
+    "alt": "עיצוב ומיתוג לאירוע חג"
+  },
+  {
+    "id": "hol-2",
+    "category": "holidays",
+    "src": "/images/portfolio/holidays2.jpg",
+    "aspect": "tall",
+    "alt": "מתנות חג ממותגות"
+  },
+  {
+    "id": "hol-5",
+    "category": "holidays",
+    "src": "/images/portfolio/hafrashat-hala.jpg",
+    "aspect": "tall",
+    "alt": "עיצוב ומיתוג לאירוע הפרשת חלה"
+  },
+  {
+    "id": "con-3",
+    "category": "concept",
+    "src": "/images/portfolio/events4.jpg",
+    "aspect": "tall",
+    "alt": "שולחן אירוע שלם בקונספט פיות יער — רקע מודפס, קופסאות מתנה, בקבוקים ומחברות באותה שפה עיצובית"
+  },
+  {
+    "id": "con-1",
+    "category": "concept",
+    "src": "/images/portfolio/company-events2.jpg",
+    "aspect": "tall",
+    "alt": "עטיפות שוקולד ממותגות ליום האישה, עם איורים והקדשות אישיות בקונספט אחיד"
+  },
+  {
+    "id": "con-4",
+    "category": "concept",
+    "src": "/images/portfolio/event8.jpg",
+    "aspect": "tall",
+    "alt": "מעמדי פטריות בחיתוך דיי־קאט לביצות הפתעה, מתוך קונספט פיות היער"
+  },
+  {
+    "id": "con-5",
+    "category": "concept",
+    "src": "/images/portfolio/events1.jpg",
+    "aspect": "tall",
+    "alt": "בר מתוקים מדורג עם ממתקים בכוסות ובקעריות, משולב בירק"
+  },
+  {
+    "id": "con-6",
+    "category": "concept",
+    "src": "/images/portfolio/events6.jpg",
+    "aspect": "tall",
+    "alt": "עיצוב אירוע בקונספט אחיד — פריטים ממותגים באותה שפה"
+  },
+  {
+    "id": "con-2",
+    "category": "concept",
+    "src": "/images/portfolio/company-events1.jpg",
+    "aspect": "tall",
+    "alt": "פריטים מודפסים בקונספט עיצובי אחיד לאירוע"
+  },
+  {
+    "id": "con-7",
+    "category": "concept",
+    "src": "/images/portfolio/events7.jpg",
+    "aspect": "tall",
+    "alt": "פריטי אירוע ממותגים בקונספט עיצובי אחד"
+  },
+  {
+    "id": "con-8",
+    "category": "concept",
+    "src": "/images/portfolio/events9.jpg",
+    "aspect": "tall",
+    "alt": "עיצוב שולחן אירוע בקונספט מותאם אישית"
+  },
+  {
+    "id": "gft-8",
+    "category": "gifts",
+    "src": "/images/portfolio/events2.jpg",
+    "aspect": "tall",
+    "alt": "קופות צדקה ממותגות כמזכרת מהחאלקה, עם כתר מוזהב ותאריך האירוע"
+  },
+  {
+    "id": "gft-9",
+    "category": "gifts",
+    "src": "/images/portfolio/events3.jpg",
+    "aspect": "tall",
+    "alt": "מתנת תודה לגננת — כוס תרמית עם שם מודפס לצד כרטיס אקריליק עם הקדשה"
+  },
+  {
+    "id": "gft-2",
+    "category": "gifts",
+    "src": "/images/portfolio/gift1.jpg",
+    "aspect": "tall",
+    "alt": "מתנה ממותגת בהתאמה אישית"
+  },
+  {
+    "id": "gft-3",
+    "category": "gifts",
+    "src": "/images/portfolio/gift3.jpg",
+    "aspect": "tall",
+    "alt": "מתנה מעוצבת עם הקדשה אישית"
+  },
+  {
+    "id": "gft-4",
+    "category": "gifts",
+    "src": "/images/portfolio/gift4.jpg",
+    "aspect": "tall",
+    "alt": "אריזת מתנה ממותגת"
+  },
+  {
+    "id": "gft-5",
+    "category": "gifts",
+    "src": "/images/portfolio/gift5.jpg",
+    "aspect": "tall",
+    "alt": "מתנה ממותגת מודפסת"
+  },
+  {
+    "id": "gft-6",
+    "category": "gifts",
+    "src": "/images/portfolio/gift6.jpg",
+    "aspect": "tall",
+    "alt": "סט מתנות ממותגות"
+  },
+  {
+    "id": "gft-7",
+    "category": "gifts",
+    "src": "/images/portfolio/gift7.jpg",
+    "aspect": "tall",
+    "alt": "מתנה מעוצבת בהתאמה אישית"
+  },
+  {
+    "id": "gft-1",
+    "category": "gifts",
+    "src": "/images/portfolio/gift2.jpg",
+    "aspect": "tall",
+    "alt": "שלט אקריליק מודפס בצורת קשת על מעמד עץ, מתנת תודה עם תמונה קבוצתית"
+  },
+  {
+    "id": "gft-10",
+    "category": "gifts",
+    "src": "/images/portfolio/events10.jpg",
+    "aspect": "tall",
+    "alt": "שלט אקריליק בצורת קשת עם מזמור לתודה ותמונת הילד, על מעמד עץ וקשור בסרט"
+  }
+]
