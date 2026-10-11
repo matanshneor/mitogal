@@ -67,6 +67,21 @@
   --color-cat-concept-deep: #616a99;
   --color-cat-concept-tint: #f1f3fb;
 
+  /* Spares for categories Gal adds from /admin (PALETTE in data/services.ts).
+     Same checks: vivid/ink 7.2–8.4, deep/white 5.2+, deep/paper 4.96+,
+     deep/tint 4.79+, tint/ink 16+. */
+  --color-cat-sky: #78b6e2;
+  --color-cat-sky-deep: #4c708a;
+  --color-cat-sky-tint: #f1f7fb;
+
+  --color-cat-plum: #c794d1;
+  --color-cat-plum-deep: #83608a;
+  --color-cat-plum-tint: #f8f3f9;
+
+  --color-cat-sage: #a3bb81;
+  --color-cat-sage-deep: #646f55;
+  --color-cat-sage-tint: #f6f8f4;
+
   --color-whatsapp: #25d366;
 
   /* ── Type ───────────────────────────────────────────────────────────── */

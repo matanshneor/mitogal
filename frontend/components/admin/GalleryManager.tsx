@@ -3,39 +3,27 @@
 import { ChevronDown, ChevronUp, ImagePlus, Pencil, RefreshCw, Trash2, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { services } from "@/data/services";
 import {
-  ApiError,
   UnauthorizedError,
   deletePhoto,
+  fetchCategories,
   fetchGallery,
   saveGalleryOrder,
   updatePhoto,
   uploadPhotos,
+  type Category,
   type GalleryItem,
 } from "@/lib/api";
 import { CHIP, FIELD, GHOST, LABEL, NOTICE, PRIMARY } from "./styles";
-
-const LIVE_DELAY = "השינויים יופיעו באתר בעוד כ-3 דקות.";
+import { useRepoAction } from "./useRepoAction";
 
 const ERRORS: Record<string, string> = {
-  gallery_not_configured: "ניהול הגלריה עוד לא הופעל: חסר לשרת אישור לכתוב לגיטהאב.",
   file_too_large: "אחת התמונות גדולה מדי (מעל 25MB).",
   too_many_files: "אפשר להעלות עד 10 תמונות בכל פעם.",
   unreadable_image: "אחד הקבצים הוא לא תמונה שאפשר לפתוח.",
   invalid_upload: "צריך לבחור קטגוריה ולפחות תמונה אחת.",
-  stale_order: "הגלריה השתנתה בינתיים. לחצו רענון ונסו שוב.",
   not_found: "התמונה כבר לא קיימת. לחצו רענון.",
 };
-
-function messageFor(err: unknown): string {
-  if (err instanceof ApiError && ERRORS[err.code]) return ERRORS[err.code]!;
-  return "משהו השתבש מול השרת. נסו שוב בעוד רגע.";
-}
-
-const labelOf = (slug: string) => services.find((s) => s.slug === slug)?.label ?? slug;
-
-type Notice = { kind: "ok" | "error"; text: string } | null;
 
 export default function GalleryManager({
   token,
@@ -45,17 +33,23 @@ export default function GalleryManager({
   onSignOut: () => void;
 }) {
   const [items, setItems] = useState<GalleryItem[] | null>(null);
+  // Fetched rather than imported: a category added a minute ago is already
+  // in the repo but not yet in this build.
+  const [categories, setCategories] = useState<Category[]>([]);
   /** Unsaved reorder. While set, the grid shows it and other actions wait. */
   const [draft, setDraft] = useState<GalleryItem[] | null>(null);
   const [filter, setFilter] = useState("all");
-  const [notice, setNotice] = useState<Notice>(null);
-  const [busy, setBusy] = useState(false);
+  const { busy, notice, setNotice, run, messageFor } = useRepoAction(onSignOut, ERRORS);
   const [version, setVersion] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
-    fetchGallery(token)
-      .then(({ items }) => !cancelled && setItems(items))
+    Promise.all([fetchGallery(token), fetchCategories(token)])
+      .then(([{ items }, { categories }]) => {
+        if (cancelled) return;
+        setItems(items);
+        setCategories(categories);
+      })
       .catch((err) => {
         if (cancelled) return;
         if (err instanceof UnauthorizedError) onSignOut();
@@ -64,22 +58,7 @@ export default function GalleryManager({
     return () => {
       cancelled = true;
     };
-  }, [token, onSignOut, version]);
-
-  /** Runs one server action with shared busy/error/sign-out handling. */
-  async function run(action: () => Promise<void>, success: string) {
-    setBusy(true);
-    setNotice(null);
-    try {
-      await action();
-      setNotice({ kind: "ok", text: `${success} ${LIVE_DELAY}` });
-    } catch (err) {
-      if (err instanceof UnauthorizedError) return onSignOut();
-      setNotice({ kind: "error", text: messageFor(err) });
-    } finally {
-      setBusy(false);
-    }
-  }
+  }, [token, onSignOut, version, messageFor, setNotice]);
 
   function refresh() {
     setDraft(null);
@@ -89,6 +68,7 @@ export default function GalleryManager({
   }
 
   const shown = draft ?? items ?? [];
+  const labelOf = (slug: string) => categories.find((c) => c.slug === slug)?.label ?? slug;
   const visible = shown.filter((it) => filter === "all" || it.category === filter);
 
   /** Swap with the neighbour in the current view, wherever it sits in the full list. */
@@ -127,6 +107,7 @@ export default function GalleryManager({
       </div>
 
       <UploadForm
+        categories={categories}
         disabled={busy || !!draft || items === null}
         onUpload={(form, count) =>
           run(async () => {
@@ -137,7 +118,7 @@ export default function GalleryManager({
       />
 
       <div role="tablist" aria-label="סינון לפי קטגוריה" className="mt-10 flex flex-wrap gap-2">
-        {[{ slug: "all", label: "הכל" }, ...services].map((s) => (
+        {[{ slug: "all", label: "הכל" }, ...categories].map((s) => (
           <button
             key={s.slug}
             type="button"
@@ -164,6 +145,8 @@ export default function GalleryManager({
             <PhotoCard
               key={item.id}
               item={item}
+              categories={categories}
+              categoryLabel={labelOf(item.category)}
               first={i === 0}
               last={i === visible.length - 1}
               locked={busy}
@@ -221,11 +204,13 @@ export default function GalleryManager({
 }
 
 function UploadForm({
+  categories,
   disabled,
   onUpload,
 }: {
+  categories: Category[];
   disabled: boolean;
-  onUpload: (form: FormData, count: number) => Promise<void>;
+  onUpload: (form: FormData, count: number) => Promise<boolean>;
 }) {
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -248,7 +233,8 @@ function UploadForm({
     const alt = String(new FormData(e.currentTarget).get("alt") ?? "").trim();
     if (alt) form.set("alt", alt);
     files.forEach((f) => form.append("photos", f));
-    await onUpload(form, files.length);
+    // Keep the selection on failure so Gal can just try again.
+    if (!(await onUpload(form, files.length))) return;
     formRef.current?.reset();
     setFiles([]);
     setPreviews([]);
@@ -308,7 +294,7 @@ function UploadForm({
             className={`${FIELD} mt-2`}
           >
             <option value="">בחרו קטגוריה</option>
-            {services.map((s) => (
+            {categories.map((s) => (
               <option key={s.slug} value={s.slug}>
                 {s.label}
               </option>
@@ -343,6 +329,8 @@ function UploadForm({
 
 function PhotoCard({
   item,
+  categories,
+  categoryLabel,
   first,
   last,
   locked,
@@ -352,13 +340,15 @@ function PhotoCard({
   onDelete,
 }: {
   item: GalleryItem;
+  categories: Category[];
+  categoryLabel: string;
   first: boolean;
   last: boolean;
   locked: boolean;
   reordering: boolean;
   onMove: (direction: -1 | 1) => void;
-  onSave: (changes: { alt?: string; category?: string }) => Promise<void>;
-  onDelete: () => Promise<void>;
+  onSave: (changes: { alt?: string; category?: string }) => Promise<boolean>;
+  onDelete: () => Promise<boolean>;
 }) {
   const [mode, setMode] = useState<"view" | "edit" | "confirm-delete">("view");
   const [missing, setMissing] = useState(false);
@@ -385,10 +375,10 @@ function PhotoCard({
       </div>
 
       <div className="p-3">
-        <p className="text-label font-semibold uppercase text-muted">{labelOf(item.category)}</p>
+        <p className="text-label font-semibold uppercase text-muted">{categoryLabel}</p>
 
         {mode === "edit" ? (
-          <EditForm item={item} onCancel={() => setMode("view")} onSave={(c) => onSave(c).then(() => setMode("view"))} />
+          <EditForm item={item} categories={categories} onCancel={() => setMode("view")} onSave={(c) => onSave(c).then((ok) => ok && setMode("view"))} />
         ) : mode === "confirm-delete" ? (
           <div className="mt-2">
             <p className="text-sm font-semibold text-ink">למחוק את התמונה מהאתר?</p>
@@ -436,12 +426,14 @@ function PhotoCard({
 
 function EditForm({
   item,
+  categories,
   onCancel,
   onSave,
 }: {
   item: GalleryItem;
+  categories: Category[];
   onCancel: () => void;
-  onSave: (changes: { alt?: string; category?: string }) => Promise<void>;
+  onSave: (changes: { alt?: string; category?: string }) => Promise<unknown>;
 }) {
   const [alt, setAlt] = useState(item.alt);
   const [category, setCategory] = useState(item.category);
@@ -482,7 +474,7 @@ function EditForm({
         onChange={(e) => setCategory(e.target.value)}
         className="min-h-10 w-full rounded-[0.75rem] border-2 border-line bg-surface px-2 text-sm text-ink"
       >
-        {services.map((s) => (
+        {categories.map((s) => (
           <option key={s.slug} value={s.slug}>
             {s.label}
           </option>

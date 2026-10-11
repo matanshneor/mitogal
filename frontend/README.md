@@ -96,17 +96,26 @@ components/
   layout/    Header · Footer · WhatsAppFab · SkipLink · Analytics
   sections/  Hero · Services · Portfolio · Process · About · Testimonials · Contact
   gallery/   FilterContext · GalleryGrid
-  admin/     AdminDashboard · GalleryManager
+  admin/     AdminDashboard · GalleryManager · CategoriesManager
   ui/        SectionHeading · MediaTile · Reveal · Button · InstagramIcon
-data/        services · gallery (.json + .ts) · process · testimonials
+data/        services · gallery (כל אחד .json + .ts) · process · testimonials
 lib/         site.config.ts · api.ts
 ```
 
 ### הוספת קטגוריה חדשה
 
-שורה אחת ב-[`data/services.ts`](data/services.ts) — ומתקבלים אוטומטית:
-משבצת בגריד, צ'יפ סינון בגלריה, אפשרות בטופס, דף `/gallery/<slug>` מלא
-עם metadata משלו, קישור בפוטר, ורשומה ב-sitemap.
+**הדרך הקלה:** `/admin` → **כרטיסיות** → **הוספת כרטיסייה**. שם גם עורכים, מוחקים
+(רק כרטיסייה בלי תמונות) ומשנים סדר.
+
+**ידנית:** רשומה אחת ב-[`data/services.json`](data/services.json). `icon` הוא מפתח
+מתוך `ICONS` ו-`color` מתוך `PALETTE`, שניהם ב-[`data/services.ts`](data/services.ts).
+
+בכל מקרה מתקבלים אוטומטית: משבצת בגריד, צ'יפ סינון בגלריה, אפשרות בטופס,
+דף `/gallery/<slug>` מלא עם metadata משלו, קישור בפוטר ורשומה ב-sitemap.
+
+**הוספת אייקון או צבע לרשימה** דורשת קוד, בשני מקומות: `ICONS`/`PALETTE` ב-`data/services.ts`,
+ו-`ICON_NAMES`/`COLOR_KEYS` ב-[`backend/src/manifests.ts`](../backend/src/manifests.ts).
+צבע חדש צריך גם טוקנים ב-`app/globals.css`, ו**בדיקת ניגודיות** לפני שמוסיפים אותו.
 
 ---
 

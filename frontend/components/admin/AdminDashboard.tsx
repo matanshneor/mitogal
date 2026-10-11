@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Images, Inbox, LogOut, MessageCircle, Phone, RefreshCw, RotateCcw } from "lucide-react";
+import { Check, Images, Inbox, LayoutGrid, LogOut, MessageCircle, Phone, RefreshCw, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useState, useSyncExternalStore, type FormEvent } from "react";
 import {
   API_URL,
@@ -11,6 +11,7 @@ import {
   type Lead,
 } from "@/lib/api";
 import { site } from "@/lib/site.config";
+import CategoriesManager from "./CategoriesManager";
 import GalleryManager from "./GalleryManager";
 import { CHIP, FIELD, GHOST, PRIMARY } from "./styles";
 
@@ -109,7 +110,13 @@ export default function AdminDashboard() {
   );
 }
 
-type Section = "leads" | "gallery";
+type Section = "leads" | "gallery" | "categories";
+
+const SECTIONS: { value: Section; label: string; icon: typeof Inbox }[] = [
+  { value: "leads", label: "פניות", icon: Inbox },
+  { value: "gallery", label: "גלריה", icon: Images },
+  { value: "categories", label: "כרטיסיות", icon: LayoutGrid },
+];
 
 function AdminShell({ token, onSignOut }: { token: string; onSignOut: () => void }) {
   const [section, setSection] = useState<Section>("leads");
@@ -117,25 +124,19 @@ function AdminShell({ token, onSignOut }: { token: string; onSignOut: () => void
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <nav aria-label="ניהול" className="flex gap-2">
-          <button
-            type="button"
-            aria-current={section === "leads" ? "page" : undefined}
-            onClick={() => setSection("leads")}
-            className={`${CHIP(section === "leads")} inline-flex items-center gap-2`}
-          >
-            <Inbox className="h-4 w-4" aria-hidden="true" />
-            פניות
-          </button>
-          <button
-            type="button"
-            aria-current={section === "gallery" ? "page" : undefined}
-            onClick={() => setSection("gallery")}
-            className={`${CHIP(section === "gallery")} inline-flex items-center gap-2`}
-          >
-            <Images className="h-4 w-4" aria-hidden="true" />
-            גלריה
-          </button>
+        <nav aria-label="ניהול" className="flex flex-wrap gap-2">
+          {SECTIONS.map(({ value, label, icon: Icon }) => (
+            <button
+              key={value}
+              type="button"
+              aria-current={section === value ? "page" : undefined}
+              onClick={() => setSection(value)}
+              className={`${CHIP(section === value)} inline-flex items-center gap-2`}
+            >
+              <Icon className="h-4 w-4" aria-hidden="true" />
+              {label}
+            </button>
+          ))}
         </nav>
         <button type="button" onClick={onSignOut} className={GHOST}>
           <LogOut className="h-4 w-4" aria-hidden="true" />
@@ -144,11 +145,9 @@ function AdminShell({ token, onSignOut }: { token: string; onSignOut: () => void
       </div>
 
       <div className="mt-10">
-        {section === "leads" ? (
-          <LeadsView token={token} onSignOut={onSignOut} />
-        ) : (
-          <GalleryManager token={token} onSignOut={onSignOut} />
-        )}
+        {section === "leads" && <LeadsView token={token} onSignOut={onSignOut} />}
+        {section === "gallery" && <GalleryManager token={token} onSignOut={onSignOut} />}
+        {section === "categories" && <CategoriesManager token={token} onSignOut={onSignOut} />}
       </div>
     </div>
   );

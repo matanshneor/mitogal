@@ -70,11 +70,16 @@ Railway → השירות → **Settings → Networking** → עריכת הדומ
 | `GET/POST /api/admin/gallery` | `/admin` → גלריה | רשימת התמונות / העלאה (עד 10, עד 25MB כל אחת) |
 | `PATCH/DELETE /api/admin/gallery/:id` | `/admin` → גלריה | עריכת תיאור או קטגוריה / מחיקה |
 | `PUT /api/admin/gallery/order` | `/admin` → גלריה | שמירת סדר חדש |
+| `GET/POST /api/admin/categories` | `/admin` → כרטיסיות | רשימה / הוספת כרטיסייה |
+| `PATCH/DELETE /api/admin/categories/:slug` | `/admin` → כרטיסיות | עריכה / מחיקה (רק בלי תמונות) |
+| `PUT /api/admin/categories/order` | `/admin` → כרטיסיות | שמירת סדר חדש |
 | `GET /health` | Railway | בודק שהשרת ומסד הנתונים פועלים |
 
 הטבלה נוצרת אוטומטית בהפעלה הראשונה. אין צורך להריץ מיגרציות.
 
-### איך עובד ניהול הגלריה
+### איך עובד ניהול הגלריה והכרטיסיות
+
+הכרטיסיות (סוגי האירועים) נשמרות ב-[`frontend/data/services.json`](frontend/data/services.json), באותה שיטה כמו התמונות.
 
 התמונות **לא** נשמרות במסד הנתונים ולא באחסון בתשלום. הן נשמרות בריפו, בדיוק כמו קודם:
 

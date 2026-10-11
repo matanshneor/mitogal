@@ -48,19 +48,20 @@ export type Change =
   | { path: string; delete: true };
 
 /**
- * Read a file at the branch head, let `build` derive the changes from it,
- * and commit them on top of that head. An empty change list commits nothing
- * and just returns `result`. If the branch moved in between (a
+ * Read files at the branch head, let `build` derive the changes from them,
+ * and commit those changes on top of that head. An empty change list commits
+ * nothing and just returns `result`. If the branch moved in between (a
  * second upload from another tab, or a push from a developer), start over
  * from the new head rather than overwrite it.
  */
-export async function commitFromFile<R>(
-  path: string,
-  build: (current: string) => { changes: Change[]; message: string; result: R },
+export async function commitFromFiles<R>(
+  paths: string[],
+  build: (current: string[]) => { changes: Change[]; message: string; result: R },
 ): Promise<R> {
   for (let attempt = 0; attempt < 3; attempt++) {
     const parent = await headSha();
-    const { changes, message, result } = build(await readFileAt(path, parent));
+    const current = await Promise.all(paths.map((p) => readFileAt(p, parent)));
+    const { changes, message, result } = build(current);
     // Nothing to change (e.g. the item was already gone): no commit, no deploy.
     if (changes.length === 0) return result;
 

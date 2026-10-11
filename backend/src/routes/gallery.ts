@@ -8,65 +8,42 @@
  * minutes.
  */
 import { randomBytes } from "node:crypto";
-import { Router, type NextFunction, type Request, type Response } from "express";
+import { Router } from "express";
 import multer from "multer";
 import sharp from "sharp";
 import { z } from "zod";
-import { requireAdmin } from "../auth.js";
-import { env } from "../env.js";
-import { GitHubNotConfiguredError, commitFromFile, readFileAtHead, type Change } from "../github.js";
-
-const MANIFEST = "frontend/data/gallery.json";
-const PHOTO_DIR = "frontend/public/images/portfolio";
-const PUBLIC_PREFIX = "/images/portfolio/";
-
-/** Mirrors the slugs in frontend/data/services.ts. Add here when adding a category there. */
-const CATEGORIES = ["weddings", "gifts", "proposals", "birthdays", "holidays", "concept"] as const;
-
-const CATEGORY_LABELS: Record<(typeof CATEGORIES)[number], string> = {
-  weddings: "חתונות",
-  gifts: "מתנות ממותגות",
-  proposals: "הצעות נישואין",
-  birthdays: "ימי הולדת",
-  holidays: "חגים",
-  concept: "אירועי קונספט",
-};
+import { commitFromFiles, readFileAtHead, type Change } from "../github.js";
+import {
+  GALLERY,
+  PHOTO_DIR,
+  PUBLIC_PREFIX,
+  SERVICES,
+  parse,
+  serialize,
+  type Category,
+  type GalleryItem,
+} from "../manifests.js";
+import { adminGitRouter } from "./shared.js";
 
 /** Matches the existing photos: phone shots at 900×1600. */
 const MAX_EDGE = 1600;
 
-type Item = {
-  id: string;
-  category: string;
-  src?: string;
-  aspect: "tall" | "square" | "wide";
-  alt: string;
-};
-
-const category = z.enum(CATEGORIES);
+const slug = z.string().regex(/^[a-z0-9-]+$/);
 const altText = z.string().trim().max(300);
 
-function parseManifest(raw: string): Item[] {
-  return JSON.parse(raw) as Item[];
-}
-
-function serialize(items: Item[]): Buffer {
-  return Buffer.from(JSON.stringify(items, null, 2) + "\n");
-}
-
-function aspectOf(width: number, height: number): Item["aspect"] {
+function aspectOf(width: number, height: number): GalleryItem["aspect"] {
   const ratio = width / height;
   if (ratio < 0.9) return "tall";
   if (ratio > 1.15) return "wide";
   return "square";
 }
 
-function defaultAlt(slug: (typeof CATEGORIES)[number]): string {
-  return `עיצוב ומיתוג ל${CATEGORY_LABELS[slug]} — עבודה של מיתוגל`;
-}
+const shortId = () => randomBytes(4).toString("hex");
 
-function shortId(): string {
-  return randomBytes(4).toString("hex");
+/** Newest first within the category; a category with no photos yet goes last. */
+function insertAtTopOfCategory(items: GalleryItem[], added: GalleryItem[]) {
+  const at = items.findIndex((it) => it.category === added[0]!.category);
+  items.splice(at === -1 ? items.length : at, 0, ...added);
 }
 
 const upload = multer({
@@ -75,38 +52,25 @@ const upload = multer({
   fileFilter: (_req, file, cb) => cb(null, file.mimetype.startsWith("image/")),
 });
 
-export const galleryRouter = Router();
-
-galleryRouter.use(requireAdmin);
-
-galleryRouter.use((_req, res, next) => {
-  if (!env.GITHUB_TOKEN) {
-    res.status(503).json({ error: "gallery_not_configured" });
-    return;
-  }
-  next();
-});
+export const galleryRouter = adminGitRouter();
 
 galleryRouter.get("/", async (_req, res) => {
-  res.json({ items: parseManifest(await readFileAtHead(MANIFEST)) });
+  res.json({ items: parse<GalleryItem>(await readFileAtHead(GALLERY)) });
 });
 
 galleryRouter.post("/", upload.array("photos", 10), async (req, res) => {
   const files = (req.files as Express.Multer.File[] | undefined) ?? [];
-  const fields = z
-    .object({ category, alt: altText.optional() })
-    .safeParse(req.body);
+  const fields = z.object({ category: slug, alt: altText.optional() }).safeParse(req.body);
   if (!fields.success || files.length === 0) {
     res.status(400).json({ error: "invalid_upload" });
     return;
   }
-  const { category: slug } = fields.data;
-  const alt = fields.data.alt || defaultAlt(slug);
+  const { category } = fields.data;
 
   // Resize before touching GitHub, so a bad file fails the whole request
   // without a half-made commit. `rotate()` applies the phone's EXIF
   // orientation; metadata (including GPS) is dropped by default.
-  let photos: { name: string; buffer: Buffer; aspect: Item["aspect"] }[];
+  let photos: { name: string; buffer: Buffer; aspect: GalleryItem["aspect"] }[];
   try {
     photos = await Promise.all(
       files.map(async (file) => {
@@ -116,7 +80,7 @@ galleryRouter.post("/", upload.array("photos", 10), async (req, res) => {
           .jpeg({ quality: 82, mozjpeg: true })
           .toBuffer({ resolveWithObject: true });
         return {
-          name: `${slug}-${Date.now().toString(36)}-${shortId()}.jpg`,
+          name: `${category}-${Date.now().toString(36)}-${shortId()}.jpg`,
           buffer: data,
           aspect: aspectOf(info.width, info.height),
         };
@@ -127,37 +91,42 @@ galleryRouter.post("/", upload.array("photos", 10), async (req, res) => {
     return;
   }
 
-  const added = await commitFromFile(MANIFEST, (raw) => {
-    const items = parseManifest(raw);
-    const newItems: Item[] = photos.map((p) => ({
-      id: `${slug}-${shortId()}`,
-      category: slug,
+  const added = await commitFromFiles([GALLERY, SERVICES], ([galleryRaw, servicesRaw]) => {
+    const target = parse<Category>(servicesRaw!).find((c) => c.slug === category);
+    if (!target) return { changes: [], message: "", result: null };
+
+    const items = parse<GalleryItem>(galleryRaw!);
+    const alt = fields.data.alt || `עיצוב ומיתוג ל${target.label} — עבודה של מיתוגל`;
+    const newItems: GalleryItem[] = photos.map((p) => ({
+      id: `${category}-${shortId()}`,
+      category,
       src: PUBLIC_PREFIX + p.name,
       aspect: p.aspect,
       alt,
     }));
-
-    // Newest first within the category; a category with no photos yet goes last.
-    const at = items.findIndex((it) => it.category === slug);
-    items.splice(at === -1 ? items.length : at, 0, ...newItems);
+    insertAtTopOfCategory(items, newItems);
 
     const changes: Change[] = [
       ...photos.map((p) => ({ path: `${PHOTO_DIR}/${p.name}`, content: p.buffer })),
-      { path: MANIFEST, content: serialize(items) },
+      { path: GALLERY, content: serialize(items) },
     ];
     return {
       changes,
-      message: `גלריה: ${photos.length === 1 ? "נוספה תמונה" : `נוספו ${photos.length} תמונות`} (${CATEGORY_LABELS[slug]})`,
+      message: `גלריה: ${photos.length === 1 ? "נוספה תמונה" : `נוספו ${photos.length} תמונות`} (${target.label})`,
       result: newItems,
     };
   });
 
+  if (!added) {
+    res.status(400).json({ error: "unknown_category" });
+    return;
+  }
   res.status(201).json({ items: added });
 });
 
 galleryRouter.patch("/:id", async (req, res) => {
   const parsed = z
-    .object({ alt: altText.min(1).optional(), category: category.optional() })
+    .object({ alt: altText.min(1).optional(), category: slug.optional() })
     .refine((v) => v.alt !== undefined || v.category !== undefined)
     .safeParse(req.body);
   if (!parsed.success) {
@@ -165,43 +134,47 @@ galleryRouter.patch("/:id", async (req, res) => {
     return;
   }
 
-  const updated = await commitFromFile(MANIFEST, (raw) => {
-    const items = parseManifest(raw);
+  type Outcome = { item: GalleryItem } | { error: string };
+  const outcome = await commitFromFiles<Outcome>([GALLERY, SERVICES], ([galleryRaw, servicesRaw]) => {
+    const fail = (error: string) => ({ changes: [], message: "", result: { error } });
+    const items = parse<GalleryItem>(galleryRaw!);
     const index = items.findIndex((it) => it.id === req.params.id);
-    if (index === -1) return { changes: [], message: "", result: null };
+    if (index === -1) return fail("not_found");
+    if (parsed.data.category && !parse<Category>(servicesRaw!).some((c) => c.slug === parsed.data.category)) {
+      return fail("unknown_category");
+    }
 
     const before = items[index]!;
-    const item: Item = { ...before, ...parsed.data };
+    const item: GalleryItem = { ...before, ...parsed.data };
     if (item.category === before.category) {
       items[index] = item;
     } else {
       // Moving category: top of its new group, like a fresh upload.
       items.splice(index, 1);
-      const at = items.findIndex((it) => it.category === item.category);
-      items.splice(at === -1 ? items.length : at, 0, item);
+      insertAtTopOfCategory(items, [item]);
     }
     return {
-      changes: [{ path: MANIFEST, content: serialize(items) }],
+      changes: [{ path: GALLERY, content: serialize(items) }],
       message: `גלריה: עודכנה תמונה (${item.id})`,
-      result: item,
+      result: { item },
     };
   });
 
-  if (!updated) {
-    res.status(404).json({ error: "not_found" });
+  if ("error" in outcome) {
+    res.status(outcome.error === "not_found" ? 404 : 400).json(outcome);
     return;
   }
-  res.json({ item: updated });
+  res.json(outcome);
 });
 
 galleryRouter.delete("/:id", async (req, res) => {
-  const removed = await commitFromFile(MANIFEST, (raw) => {
-    const items = parseManifest(raw);
+  const removed = await commitFromFiles([GALLERY], ([raw]) => {
+    const items = parse<GalleryItem>(raw!);
     const index = items.findIndex((it) => it.id === req.params.id);
     if (index === -1) return { changes: [], message: "", result: false };
 
     const [item] = items.splice(index, 1);
-    const changes: Change[] = [{ path: MANIFEST, content: serialize(items) }];
+    const changes: Change[] = [{ path: GALLERY, content: serialize(items) }];
     // Delete the file too, or check-images fails the next frontend build.
     if (item!.src?.startsWith(PUBLIC_PREFIX)) {
       changes.push({ path: `${PHOTO_DIR}/${item!.src.slice(PUBLIC_PREFIX.length)}`, delete: true });
@@ -224,8 +197,8 @@ galleryRouter.put("/order", async (req, res) => {
   }
   const { ids } = parsed.data;
 
-  const ok = await commitFromFile(MANIFEST, (raw) => {
-    const items = parseManifest(raw);
+  const ok = await commitFromFiles([GALLERY], ([raw]) => {
+    const items = parse<GalleryItem>(raw!);
     const byId = new Map(items.map((it) => [it.id, it]));
     // Must be exactly the current set: otherwise the admin was looking at a
     // stale list, and saving it would silently drop or resurrect photos.
@@ -233,7 +206,7 @@ galleryRouter.put("/order", async (req, res) => {
       ids.length === items.length && new Set(ids).size === ids.length && ids.every((id) => byId.has(id));
     if (!sameSet) return { changes: [], message: "", result: false };
     return {
-      changes: [{ path: MANIFEST, content: serialize(ids.map((id) => byId.get(id)!)) }],
+      changes: [{ path: GALLERY, content: serialize(ids.map((id) => byId.get(id)!)) }],
       message: "גלריה: שונה סדר התמונות",
       result: true,
     };
@@ -244,16 +217,4 @@ galleryRouter.put("/order", async (req, res) => {
     return;
   }
   res.json({ ok: true });
-});
-
-galleryRouter.use((err: unknown, _req: Request, res: Response, next: NextFunction) => {
-  if (err instanceof GitHubNotConfiguredError) {
-    res.status(503).json({ error: "gallery_not_configured" });
-    return;
-  }
-  if (err instanceof multer.MulterError) {
-    res.status(413).json({ error: err.code === "LIMIT_FILE_SIZE" ? "file_too_large" : "too_many_files" });
-    return;
-  }
-  next(err);
 });

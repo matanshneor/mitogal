@@ -6,6 +6,7 @@
  * a redeploy.
  */
 import type { GalleryItem } from "@/data/gallery";
+import type { ServiceEntry as Category } from "@/data/services";
 import type { LeadFields } from "@/lib/site.config";
 
 export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
@@ -120,4 +121,38 @@ export function deletePhoto(token: string, id: string): Promise<{ ok: true }> {
 
 export function saveGalleryOrder(token: string, ids: string[]): Promise<{ ok: true }> {
   return adminFetch("/gallery/order", token, { method: "PUT", body: JSON.stringify({ ids }) });
+}
+
+export type { Category };
+
+export type CategoryFields = Omit<Category, "slug">;
+
+export function fetchCategories(token: string): Promise<{ categories: Category[] }> {
+  return adminFetch("/categories", token);
+}
+
+export function createCategory(
+  token: string,
+  fields: CategoryFields & { slug?: string },
+): Promise<{ category: Category }> {
+  return adminFetch("/categories", token, { method: "POST", body: JSON.stringify(fields) });
+}
+
+export function updateCategory(
+  token: string,
+  slug: string,
+  changes: Partial<CategoryFields>,
+): Promise<{ category: Category }> {
+  return adminFetch(`/categories/${encodeURIComponent(slug)}`, token, {
+    method: "PATCH",
+    body: JSON.stringify(changes),
+  });
+}
+
+export function deleteCategory(token: string, slug: string): Promise<{ ok: true }> {
+  return adminFetch(`/categories/${encodeURIComponent(slug)}`, token, { method: "DELETE" });
+}
+
+export function saveCategoryOrder(token: string, slugs: string[]): Promise<{ ok: true }> {
+  return adminFetch("/categories/order", token, { method: "PUT", body: JSON.stringify({ slugs }) });
 }

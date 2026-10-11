@@ -4,8 +4,10 @@ import helmet from "helmet";
 import { migrate, pool } from "./db.js";
 import { env } from "./env.js";
 import { adminRouter } from "./routes/admin.js";
+import { categoriesRouter } from "./routes/categories.js";
 import { galleryRouter } from "./routes/gallery.js";
 import { leadsRouter } from "./routes/leads.js";
+import { repoErrorHandler } from "./routes/shared.js";
 
 const app = express();
 
@@ -29,6 +31,8 @@ app.get("/health", async (_req, res) => {
 
 app.use("/api/leads", leadsRouter);
 app.use("/api/admin/gallery", galleryRouter);
+app.use("/api/admin/categories", categoriesRouter);
+app.use("/api/admin", repoErrorHandler);
 app.use("/api/admin", adminRouter);
 
 app.use((_req, res) => {
