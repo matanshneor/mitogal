@@ -25,7 +25,7 @@ export const site = {
   /** The year Gal started the business — drives the footer and the JSON-LD. */
   foundedYear: 2024,
 
-  /** Update to the real domain once it is connected in Netlify. */
+  /** Update to the real domain once it is connected in Railway. */
   url: "https://mitogal.netlify.app",
 } as const;
 

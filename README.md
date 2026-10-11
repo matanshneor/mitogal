@@ -1,164 +1,122 @@
-# מיתוגל — אתר תדמית ולידים
+# מיתוגל
 
-אתר נחיתה בעברית (RTL, mobile-first) עבור **מיתוגל** — עיצוב ומיתוג לאירועים של גל אהרוני.
-המטרה: להמיר גולש שהגיע מהאינסטגרם לפנייה בוואטסאפ תוך גלילה אחת.
+האתר של **מיתוגל**, עיצוב ומיתוג לאירועים של גל אהרוני.
 
-**Next.js 16 · React 19 · Tailwind v4 · Framer Motion · TypeScript**
+```
+frontend/   האתר עצמו: Next.js 16 · React 19 · Tailwind v4     → פרטים ב-frontend/README.md
+backend/    השרת: Node 22 · Express 5 · Postgres               → שומר פניות, מגיש את /admin
+```
+
+שני השירותים עולים ל-Railway כשני שירותים נפרדים באותו פרויקט, יחד עם מסד נתונים Postgres.
 
 ---
 
-## הרצה
+## מה הבקנד עושה
+
+| נתיב | מי משתמש | מה הוא עושה |
+|---|---|---|
+| `POST /api/leads` | הטופס באתר | שומר פנייה. מוגבל ל-10 פניות ל-10 דקות לכל IP, ובוטים נחסמים בשדה נסתר |
+| `POST /api/admin/login` | עמוד `/admin` | בודק סיסמה ומחזיר חיבור ל-12 שעות. 5 ניסיונות שגויים חוסמים ל-15 דקות |
+| `GET /api/admin/leads` | עמוד `/admin` | 500 הפניות האחרונות |
+| `PATCH /api/admin/leads/:id` | עמוד `/admin` | מסמן פנייה כ"טופלה" או מחזיר אותה ל"חדשה" |
+| `GET /health` | Railway | בודק שהשרת ומסד הנתונים פועלים |
+
+הטבלה נוצרת אוטומטית בהפעלה הראשונה. אין צורך להריץ מיגרציות.
+
+---
+
+## הרצה מקומית
+
+צריך Postgres מקומי. אפשר למשל עם Docker:
+`docker run -e POSTGRES_PASSWORD=dev -p 5432:5432 postgres:17`
 
 ```bash
+# טרמינל 1: בקנד
+cd backend
+cp .env.example .env        # למלא ADMIN_PASSWORD ו-SESSION_SECRET
 npm install
-npm run dev            # http://localhost:3000
-npm run build          # בנייה לייצור
-npm run lint
-npm run check:images   # מאמת שתיקיית התמונות והמניפסט מסונכרנים
-```
+npm run dev                 # http://localhost:4000
 
-`check:images` רץ אוטומטית לפני כל `build`. הוא **מפיל את הבנייה** אם תמונה
-מופיעה במניפסט ולא קיימת בתיקייה, או להפך — קיימת בתיקייה ולא מוצגת בשום מקום
-באתר. זה נוסף אחרי שתמונה אחת נעלמה מהאתר בשקט: הקובץ נשאר על הדיסק, הרשומה
-נמחקה בטעות, ואף אחד לא ידע.
+# טרמינל 2: פרונטנד
+cd frontend
+cp .env.example .env.local  # NEXT_PUBLIC_API_URL=http://localhost:4000
+npm install
+npm run dev                 # http://localhost:3000  ·  ניהול: /admin
+```
 
 ---
 
-## שלושת הדברים שתרצה לשנות
+## העלאה ל-Railway
 
-### 1. מספר טלפון, אינסטגרם וכתובת האתר
+### 1. פרויקט ומסד נתונים
 
-הכל יושב במקום **אחד בלבד** — [`lib/site.config.ts`](lib/site.config.ts).
-אין מספר טלפון מקודד בשום קומפוננטה. שינוי שם מתעדכן בכפתור הצף, בטופס,
-בפוטר, בכותרת, ב-JSON-LD ובכל קישורי הוואטסאפ בבת אחת.
+1. דוחפים את הריפו לגיטהאב.
+2. ב-Railway: **New Project → Deploy from GitHub repo**, ובוחרים את `mitogal`.
+3. בתוך הפרויקט: **+ Create → Database → PostgreSQL**.
 
-> ⚠️ לפני עלייה לאוויר: עדכן את `url` לדומיין האמיתי — הוא משמש ל-OpenGraph,
-> ל-canonical ול-sitemap.
+### 2. שירות הבקנד
 
-### 2. תמונות אמיתיות
+שירות חדש מהריפו. ב-**Settings** שלו:
 
-כרגע כל משבצת בגלריה היא ריבוע גרדיאנט זמני באותן מידות בדיוק כמו התמונה
-הסופית, כך שהוספת תמונות אמיתיות **לא מזיזה כלום בפריסה**.
-
-1. שים את הקובץ ב-`public/images/portfolio/`
-2. הוסף `src` לשורה המתאימה ב-[`data/gallery.ts`](data/gallery.ts)
-3. עדכן את ה-`alt` כך שיתאר את התמונה בפועל
-
-```ts
-{ id: "wed-01", category: "weddings",
-  alt: "שלט כניסה מעוצב לחתונה עם שמות בני הזוג",
-  src: "/images/portfolio/wedding-01.jpg",   // ← השורה היחידה שמתווספת
-  aspect: "tall" },
-```
-
-לתמונת ה-hero ולפורטרט של גל — ראה את ה-`MediaTile` ב-`components/sections/Hero.tsx`
-ו-`About.tsx`. ב-Hero יש גם הערה עם הקוד המוכן להחלפה בווידאו.
-
-### 3. Google Analytics ו-Meta Pixel
-
-```bash
-cp .env.example .env.local
-```
-ומלא את `NEXT_PUBLIC_GA_ID` / `NEXT_PUBLIC_META_PIXEL_ID`.
-בלי המשתנים — שום סקריפט לא נטען ואין אזהרות.
-
----
-
-## איך הטופס עובד (אין שרת)
-
-הטופס לא שולח לשום מקום. בלחיצה על "שליחה בוואטסאפ" הוא מרכיב את כל מה
-שהמבקר מילא להודעת וואטסאפ מוכנה, פותח את `wa.me` — והמבקר רק לוחץ שלח.
-הליד נוחת ישירות בטלפון של גל.
-
-זה אומר: אפס שרתים, אפס עלות חודשית, אפס תיבת דואר שאף אחד לא בודק.
-הלוגיקה ב-`waLeadLink()` בתוך [`lib/site.config.ts`](lib/site.config.ts).
-
----
-
-## מבנה
-
-```
-app/
-  layout.tsx                    RTL shell, פונטים, metadata, JSON-LD
-  page.tsx                      דף הנחיתה
-  gallery/[category]/page.tsx   תבנית אחת → 6 דפי קטגוריה סטטיים
-  sitemap.ts / robots.ts        נגזרים מ-data/services.ts
-components/
-  layout/    Header · Footer · WhatsAppFab · SkipLink · Analytics
-  sections/  Hero · Services · Portfolio · Process · About · Testimonials · Contact
-  gallery/   FilterContext · GalleryGrid
-  ui/        SectionHeading · MediaTile · Reveal · Button · InstagramIcon
-data/        services · gallery · process · testimonials
-lib/         site.config.ts
-```
-
-### הוספת קטגוריה חדשה
-
-שורה אחת ב-[`data/services.ts`](data/services.ts) — ומתקבלים אוטומטית:
-משבצת בגריד, צ'יפ סינון בגלריה, אפשרות בטופס, דף `/gallery/<slug>` מלא
-עם metadata משלו, קישור בפוטר, ורשומה ב-sitemap.
-
----
-
-## דפלוי — Netlify
-
-1. דחוף את הריפו לגיטהאב
-2. ב-Netlify: **Add new site → Import an existing project**
-3. אין מה להגדיר — [`netlify.toml`](netlify.toml) כבר מכיל את פקודת הבנייה,
-   את גרסת Node ואת `@netlify/plugin-nextjs`
-4. דומיין ו-HTTPS דרך **Domain settings**
-
-כל דחיפה ל-main עולה לאוויר אוטומטית.
-
----
-
-## ⚠️ לפני עלייה לאוויר
-
-| מה | איפה |
+| הגדרה | ערך |
 |---|---|
-| **המלצות אמיתיות** — הציטוטים הם טקסט לדוגמה. הייחוס תחת כל אחד אומר "דוגמה לטקסט", אז שום דבר לא מתחזה להמלצה אמיתית — אבל **אסור לתת להם שמות אמיתיים בלי ציטוט אמיתי** | `data/testimonials.ts` — החלף והפוך את `testimonialsArePlaceholder` ל-`false`, או הסר את הסקשן מ-`app/page.tsx` |
-| **טקסט "אודות"** — טיוטה שנכתבה לפי הביו באינסטגרם, לא המילים של גל | `components/sections/About.tsx` (מסומן ב-TODO) |
-| **9 תמונות לא מסווגות** — `events*.jpg` ב-`public/images/portfolio/`, לא מופיעות באתר | `data/gallery.ts` (מסומן בהערה בסוף הקובץ) |
-| **פורטרט של גל** — הפלייסהולדר היחיד שנשאר | `components/sections/About.tsx` |
-| **דומיין** | `site.url` ב-`lib/site.config.ts` |
+| Service name | `backend` |
+| Root Directory | `/backend` |
+| Config File Path | `/backend/railway.json` |
+| Networking | **Generate Domain** |
+
+ב-**Variables**:
+
+```
+DATABASE_URL     = ${{Postgres.DATABASE_URL}}
+CORS_ORIGINS     = https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}
+ADMIN_PASSWORD   = <הסיסמה של גל, לפחות 10 תווים>
+SESSION_SECRET   = <מחרוזת אקראית: openssl rand -base64 48>
+```
+
+### 3. שירות הפרונטנד
+
+עוד שירות מאותו ריפו:
+
+| הגדרה | ערך |
+|---|---|
+| Service name | `frontend` |
+| Root Directory | `/frontend` |
+| Config File Path | `/frontend/railway.json` |
+| Networking | **Generate Domain** |
+
+ב-**Variables**:
+
+```
+NEXT_PUBLIC_API_URL = https://${{backend.RAILWAY_PUBLIC_DOMAIN}}
+```
+
+ואם רוצים אנליטיקס: `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_META_PIXEL_ID`.
+
+> ⚠️ משתני `NEXT_PUBLIC_*` נצרבים לתוך האתר **בזמן הבנייה**. אחרי שמשנים
+> אותם צריך **Redeploy** לפרונטנד, ושינוי בלבד לא יספיק.
+
+### 4. בדיקה
+
+- `https://<backend-domain>/health` צריך להחזיר `{"ok":true}`
+- ממלאים את הטופס באתר ונכנסים ל-`/admin`. הפנייה צריכה להופיע שם.
+
+### 5. דומיין משלכם
+
+ב-frontend: **Settings → Networking → Custom Domain**. אחר כך:
+
+1. מוסיפים את הדומיין ל-`CORS_ORIGINS` של הבקנד, מופרד בפסיק:
+   `https://mitogal.co.il,https://www.mitogal.co.il`
+2. מעדכנים את `url` ב-[`frontend/lib/site.config.ts`](frontend/lib/site.config.ts).
+   הוא משמש לתמונות השיתוף, ל-canonical ול-sitemap.
+
+כל דחיפה ל-`main` מעלה מחדש רק את השירות שהקבצים שלו השתנו (`watchPatterns` ב-`railway.json`).
 
 ---
 
-## עיצוב
+## אבטחה, בקצרה
 
-**"בית דפוס".** גל מדפיסה, חותכת, מקפלת ואורזת — עטיפות שוקולד, שלטי
-אקריליק, תפריטים, אריזות מתנה. האתר בנוי מעולם החומרים הזה: נייר, דיו
-רווי, פינות דיי־קאט וקשתות.
-
-הטוקנים חיים ב-`@theme` בתוך [`app/globals.css`](app/globals.css) — אין
-`tailwind.config.js`.
-
-### צבע
-
-צבע המותג `#6ED7D8` **נדגם מהלוגו של גל עצמה** (האות G ב-"Gal"), לא הומצא.
-הוא בהיר, ולכן הוא צבע **מילוי בלבד — תמיד עם טקסט דיו** (10.4:1). הגרסה
-`-deep` (`#3C7677`) היא זו שנושאת טקסט לבן ומשמשת כצבע טקסט על נייר.
-
-לכל קטגוריה יש **צבע משלה** שצובע את הכרטיס שלה, את צ'יפ הסינון שלה ואת
-תמונת השיתוף של הדף שלה. כל אחד קיים בשלוש דרגות: `vivid` (מילוי + טקסט
-דיו), `-deep` (טקסט קטן / לבן על צבע) ו-`-tint` (רקעים).
-
-> **כל 26 צמדי הצבעים נבדקו מול WCAG AA ועוברים.** אם מוסיפים גוון — לבדוק
-> ניגודיות לפני. זו הנקודה שבה עיצובים צבעוניים נשברים.
-
-### כללי אצבע
-
-- **Fredoka לכותרות, Assistant לגוף.** אף פעם לא הפוך.
-- **קשת** (`arch`) שמורה לתמונות מפתח — ה-hero והפורטרט. היא קשת הבלונים, והיא מופיעה גם בעבודות של גל עצמה.
-- **צללים נושאים גוון**, אף פעם לא אפור ניטרלי.
-- **RTL:** בקוד משתמשים רק ב-`ps-`/`pe-`/`ms-`/`me-`/`text-start`/`text-end`. החריג היחיד הוא הכפתור הצף, שמקובע פיזית ל-`left-4`.
-
-### נכסי מותג
-
-| קובץ | שימוש |
-|---|---|
-| `brand/logo-original.jpeg` | הקובץ המקורי של גל — מקור לכל השאר |
-| `public/logo-wordmark.png` | חיתוך צר לטקסט, לכותרת ולפוטר |
-| `public/logo.png` | הסימן המלא עם האקוורל, לתמונות השיתוף |
-| `app/icon.svg` | פאביקון |
-| `brand/Assistant-Bold.ttf` | פונט עברי סטטי — נדרש ליצירת תמונות השיתוף בלבד |
+- הסיסמה לא נשמרת בדפדפן. נשמר רק טוקן חתום שפג אחרי 12 שעות, והוא נמחק כשסוגרים את הלשונית.
+- החלפת `SESSION_SECRET` מנתקת את כל מי שמחובר.
+- הבקנד מקבל בקשות רק מהכתובות שב-`CORS_ORIGINS`.
+- `/admin` חסום למנועי חיפוש (`robots.txt` ו-`noindex`).

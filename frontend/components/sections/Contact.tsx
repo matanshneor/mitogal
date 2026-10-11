@@ -4,6 +4,7 @@ import { ChevronDown, MessageCircle, Phone } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import InstagramIcon from "@/components/ui/InstagramIcon";
 import Reveal from "@/components/ui/Reveal";
+import { saveLead } from "@/lib/api";
 import { services } from "@/data/services";
 import {
   site,
@@ -25,10 +26,10 @@ const SOCIAL_BUTTON =
 /**
  * The lead form, closing the page on a full-width brand band.
  *
- * There is no server: on submit we compose everything the visitor typed into
- * a ready-to-send WhatsApp message and hand off to WhatsApp. That means zero
- * hosting cost, nothing to maintain, no inbox that goes unchecked — and the
- * lead lands on Gal's phone in the app she already lives in.
+ * On submit the lead is saved to the backend (so it reaches /admin even if
+ * the visitor never hits send) and, in the same gesture, composed into a
+ * ready-to-send WhatsApp message — the lead still lands on Gal's phone in the
+ * app she already lives in.
  *
  * Because WhatsApp opens in a different tab, the page itself looked like
  * nothing had happened. A confirmation now stays behind, announced through
@@ -50,13 +51,16 @@ export default function Contact() {
     }
     setNameError(false);
 
-    const url = waLeadLink({
+    const lead = {
       name,
       phone: String(form.get("phone") ?? "").trim() || undefined,
       eventType: String(form.get("eventType") ?? "").trim() || undefined,
       date: String(form.get("date") ?? "").trim() || undefined,
       message: String(form.get("message") ?? "").trim() || undefined,
-    });
+    };
+
+    saveLead({ ...lead, website: String(form.get("website") ?? "") });
+    const url = waLeadLink(lead);
 
     // Called straight from the submit gesture, so popup blockers allow it.
     window.open(url, "_blank", "noopener,noreferrer");
@@ -185,6 +189,13 @@ export default function Contact() {
                   />
                 </div>
 
+                {/* Honeypot: invisible to people and screen readers, filled
+                    in by spam bots. The backend silently drops those. */}
+                <div aria-hidden="true" className="sr-only">
+                  <label htmlFor="website">אתר</label>
+                  <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+                </div>
+
                 <button
                   type="submit"
                   className="inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-full bg-brand px-6 font-display text-base font-semibold text-ink shadow-brand transition-all hover:brightness-105"
@@ -213,8 +224,8 @@ export default function Contact() {
                 </div>
 
                 <p className="text-sm text-muted">
-                  הפרטים שלכם לא נשמרים בשום מקום — הם רק נכנסים להודעת הוואטסאפ שאתם
-                  שולחים.
+                  הפרטים נשמרים אצלנו רק כדי שנוכל לחזור אליכם, ולא מועברים לאף
+                  אחד אחר.
                 </p>
               </form>
             </div>
