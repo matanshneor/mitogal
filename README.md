@@ -9,6 +9,41 @@ backend/    השרת: Node 22 · Express 5 · Postgres               → שומ�
 
 שני השירותים עולים ל-Railway כשני שירותים נפרדים באותו פרויקט, יחד עם מסד נתונים Postgres.
 
+## באוויר
+
+| | כתובת |
+|---|---|
+| האתר | https://mitogal.up.railway.app |
+| ניהול פניות | https://mitogal.up.railway.app/admin |
+| השרת | https://mitogal-api.up.railway.app (בדיקה: `/health`) |
+| Railway | פרויקט `mitogal`: שירותים `frontend`, `backend`, `Postgres` |
+
+**כל דחיפה ל-`main` עולה לאוויר לבד** תוך כמה דקות. מתעדכן רק השירות שהקבצים
+שלו השתנו (`watchPatterns` ב-`railway.json`). שינוי ב-README הראשי לא מעלה כלום.
+
+> ⚠️ **לא למחוק את שירות `Postgres`**. כל הפניות שמורות בו, ואין להן גיבוי אחר.
+
+---
+
+## תחזוקה
+
+### החלפת הסיסמה של /admin
+
+1. Railway → `backend` → **Variables** → `ADMIN_PASSWORD` → ערך חדש (לפחות 10 תווים)
+2. **Deploy** לשינויים. אם השירות לא עלה מחדש לבד: **Deployments → Redeploy**
+
+עד שהשרת עולה מחדש, הסיסמה הישנה ממשיכה לעבוד. מי שכבר מחובר נשאר מחובר עד
+שהחיבור שלו פג (12 שעות). כדי לנתק את כולם מיד, מחליפים גם את `SESSION_SECRET`.
+
+### שינוי הכתובת `*.up.railway.app`
+
+Railway → השירות → **Settings → Networking** → עריכת הדומיין. אחרי שינוי:
+
+- **כתובת השרת השתנתה?** צריך **Redeploy ל-frontend**, כי הכתובת נצרבת באתר בזמן הבנייה.
+- **כתובת האתר השתנתה?** צריך Redeploy ל-backend (בשביל `CORS_ORIGINS`), ולעדכן את `url` ב-[`frontend/lib/site.config.ts`](frontend/lib/site.config.ts).
+
+המשתנים עצמם מתעדכנים לבד, כי הם מפנים ל-`RAILWAY_PUBLIC_DOMAIN`.
+
 ---
 
 ## מה הבקנד עושה
@@ -46,13 +81,19 @@ npm run dev                 # http://localhost:3000  ·  ניהול: /admin
 
 ---
 
-## העלאה ל-Railway
+## הקמה מאפס ב-Railway
+
+הפרויקט כבר מוקם. הסעיף הזה נועד למקרה שצריך להקים אותו מחדש, למשל בחשבון אחר.
 
 ### 1. פרויקט ומסד נתונים
 
 1. דוחפים את הריפו לגיטהאב.
 2. ב-Railway: **New Project → Deploy from GitHub repo**, ובוחרים את `mitogal`.
 3. בתוך הפרויקט: **+ Create → Database → PostgreSQL**.
+
+> **את הריפו מחברים רק מהאתר של Railway** (**Settings → Source → Connect Repo**).
+> חיבור דרך שורת הפקודה (`railway environment edit`) נראה מחובר בהגדרות, אבל
+> Railway לא מקבל הודעה על דחיפות לגיטהאב, והאתר לא מתעדכן לבד.
 
 ### 2. שירות הבקנד
 
@@ -109,8 +150,7 @@ NEXT_PUBLIC_API_URL = https://${{backend.RAILWAY_PUBLIC_DOMAIN}}
    `https://mitogal.co.il,https://www.mitogal.co.il`
 2. מעדכנים את `url` ב-[`frontend/lib/site.config.ts`](frontend/lib/site.config.ts).
    הוא משמש לתמונות השיתוף, ל-canonical ול-sitemap.
-
-כל דחיפה ל-`main` מעלה מחדש רק את השירות שהקבצים שלו השתנו (`watchPatterns` ב-`railway.json`).
+3. Redeploy ל-backend, כדי שהשינוי ב-`CORS_ORIGINS` ייכנס לתוקף.
 
 ---
 

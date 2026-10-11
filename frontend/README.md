@@ -34,35 +34,36 @@ npm run check:images   # מאמת שתיקיית התמונות והמניפסט
 אין מספר טלפון מקודד בשום קומפוננטה. שינוי שם מתעדכן בכפתור הצף, בטופס,
 בפוטר, בכותרת, ב-JSON-LD ובכל קישורי הוואטסאפ בבת אחת.
 
-> ⚠️ לפני עלייה לאוויר: עדכן את `url` לדומיין האמיתי — הוא משמש ל-OpenGraph,
-> ל-canonical ול-sitemap.
+> `url` מוגדר כרגע ל-`https://mitogal.up.railway.app`. כשמחברים דומיין משלכם —
+> לעדכן אותו. הוא משמש ל-OpenGraph, ל-canonical ול-sitemap.
 
-### 2. תמונות אמיתיות
+### 2. תמונות
 
-כרגע כל משבצת בגלריה היא ריבוע גרדיאנט זמני באותן מידות בדיוק כמו התמונה
-הסופית, כך שהוספת תמונות אמיתיות **לא מזיזה כלום בפריסה**.
+כל 43 המשבצות בגלריה כבר מציגות עבודות אמיתיות של גל. להוספת תמונה:
 
 1. שים את הקובץ ב-`public/images/portfolio/`
-2. הוסף `src` לשורה המתאימה ב-[`data/gallery.ts`](data/gallery.ts)
-3. עדכן את ה-`alt` כך שיתאר את התמונה בפועל
+2. הוסף שורה ב-[`data/gallery.ts`](data/gallery.ts)
+3. כתוב `alt` שמתאר את התמונה בפועל
 
 ```ts
-{ id: "wed-01", category: "weddings",
-  alt: "שלט כניסה מעוצב לחתונה עם שמות בני הזוג",
-  src: "/images/portfolio/wedding-01.jpg",   // ← השורה היחידה שמתווספת
-  aspect: "tall" },
+{ id: "wed-09", category: "weddings", src: `${P}/wedding-09.jpg`, aspect: "tall",
+  alt: "שלט כניסה מעוצב לחתונה עם שמות בני הזוג" },
 ```
 
-לתמונת ה-hero ולפורטרט של גל — ראה את ה-`MediaTile` ב-`components/sections/Hero.tsx`
-ו-`About.tsx`. ב-Hero יש גם הערה עם הקוד המוכן להחלפה בווידאו.
+`check:images` יפיל את הבנייה אם שכחת אחד משני הצעדים הראשונים.
+
+הפורטרט של גל ב-[`About.tsx`](components/sections/About.tsx) עדיין משבצת זמנית.
 
 ### 3. Google Analytics ו-Meta Pixel
 
 ```bash
 cp .env.example .env.local
 ```
-ומלא את `NEXT_PUBLIC_API_URL` (חובה, כתובת הבקנד) ואת `NEXT_PUBLIC_GA_ID` / `NEXT_PUBLIC_META_PIXEL_ID` (רשות).
-בלי המשתנים — שום סקריפט לא נטען ואין אזהרות.
+ומלא את `NEXT_PUBLIC_GA_ID` / `NEXT_PUBLIC_META_PIXEL_ID`. בלי המשתנים האלה שום
+סקריפט אנליטיקס לא נטען ואין אזהרות.
+
+באותו קובץ גם `NEXT_PUBLIC_API_URL`, כתובת הבקנד. הוא **חובה**: בלעדיו הטופס
+לא שומר פניות ו-`/admin` לא עובד.
 
 ---
 
@@ -112,15 +113,15 @@ lib/         site.config.ts · api.ts
 
 ---
 
-## ⚠️ לפני עלייה לאוויר
+## ⚠️ עדיין פתוח
 
 | מה | איפה |
 |---|---|
 | **המלצות אמיתיות** — הציטוטים הם טקסט לדוגמה. הייחוס תחת כל אחד אומר "דוגמה לטקסט", אז שום דבר לא מתחזה להמלצה אמיתית — אבל **אסור לתת להם שמות אמיתיים בלי ציטוט אמיתי** | `data/testimonials.ts` — החלף והפוך את `testimonialsArePlaceholder` ל-`false`, או הסר את הסקשן מ-`app/page.tsx` |
 | **טקסט "אודות"** — טיוטה שנכתבה לפי הביו באינסטגרם, לא המילים של גל | `components/sections/About.tsx` (מסומן ב-TODO) |
-| **9 תמונות לא מסווגות** — `events*.jpg` ב-`public/images/portfolio/`, לא מופיעות באתר | `data/gallery.ts` (מסומן בהערה בסוף הקובץ) |
+| **טקסט חלופי (alt) כללי מדי** — בשלוש תמונות: con-6, con-7, con-8 | `data/gallery.ts` (מסומן בהערה בסוף הקובץ) |
 | **פורטרט של גל** — הפלייסהולדר היחיד שנשאר | `components/sections/About.tsx` |
-| **דומיין** | `site.url` ב-`lib/site.config.ts` |
+| **דומיין משלכם** (רשות) — כרגע `mitogal.up.railway.app` | [README הראשי](../README.md), סעיף "דומיין משלכם" |
 
 ---
 
