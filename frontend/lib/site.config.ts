@@ -26,7 +26,7 @@ export const site = {
   foundedYear: 2024,
 
   /** Update to the real domain once it is connected in Railway. */
-  url: "https://mitogal.netlify.app",
+  url: "https://mitogal.up.railway.app",
 } as const;
 
 /** `tel:` href built from the canonical number. */
