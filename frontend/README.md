@@ -5,6 +5,8 @@
 
 **Next.js 16 · React 19 · Tailwind v4 · Framer Motion · TypeScript**
 
+באוויר: https://mitogal.up.railway.app · ניהול: https://mitogal.up.railway.app/admin
+
 ---
 
 ## הרצה
