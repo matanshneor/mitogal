@@ -55,7 +55,7 @@ npm run check:images   # מאמת שתיקיית התמונות והמניפסט
 
 `check:images` יפיל את הבנייה אם שכחת אחד משני הצעדים הראשונים.
 
-הפורטרט של גל ב-[`About.tsx`](components/sections/About.tsx) עדיין משבצת זמנית.
+הפורטרט של גל: `public/images/gal-portrait.jpg` (חיתוך 4:5 מהכתפיים ומעלה, 960×1200), מוצג ב-[`About.tsx`](components/sections/About.tsx).
 
 ### 3. Google Analytics ו-Meta Pixel
 
@@ -132,7 +132,6 @@ lib/         site.config.ts · api.ts
 | **המלצות אמיתיות** — הציטוטים הם טקסט לדוגמה. הייחוס תחת כל אחד אומר "דוגמה לטקסט", אז שום דבר לא מתחזה להמלצה אמיתית — אבל **אסור לתת להם שמות אמיתיים בלי ציטוט אמיתי** | `data/testimonials.ts` — החלף והפוך את `testimonialsArePlaceholder` ל-`false`, או הסר את הסקשן מ-`app/page.tsx` |
 | **טקסט "אודות"** — טיוטה שנכתבה לפי הביו באינסטגרם, לא המילים של גל | `components/sections/About.tsx` (מסומן ב-TODO) |
 | **טקסט חלופי (alt) כללי מדי** — בשלוש תמונות: con-6, con-7, con-8 | `/admin` → גלריה → ✎ (ההערה בראש `data/gallery.ts`) |
-| **פורטרט של גל** — הפלייסהולדר היחיד שנשאר | `components/sections/About.tsx` |
 | **דומיין משלכם** (רשות) — כרגע `mitogal.up.railway.app` | [README הראשי](../README.md), סעיף "דומיין משלכם" |
 
 ---

@@ -23,6 +23,7 @@ export default function About() {
       <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-6 md:grid-cols-[0.85fr_1.15fr] md:gap-16">
         <Reveal>
           <MediaTile
+            src="/images/gal-portrait.jpg"
             alt="גל אהרוני, מעצבת ומייסדת מיתוגל"
             label="גל אהרוני"
             aspect="portrait"
