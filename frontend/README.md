@@ -159,7 +159,8 @@ lib/         site.config.ts · api.ts
 | קובץ | שימוש |
 |---|---|
 | `brand/logo-original.jpeg` | הקובץ המקורי של גל — מקור לכל השאר |
-| `public/logo-wordmark.png` | חיתוך צר לטקסט, לכותרת ולפוטר |
-| `public/logo.png` | הסימן המלא עם האקוורל, לתמונות השיתוף |
-| `app/icon.svg` | פאביקון |
+| `public/logo-script.png` | חיתוך צר של הכתב — בכותרת, בפוטר ובתמונות השיתוף |
+| `public/logo.png` | הסימן המלא עם האקוורל (`<Logo variant="full">`) |
+| `app/icon.png` · `app/apple-icon.png` | פאביקון ואייקון למסך הבית באייפון |
+| `brand/love-day1-original.jpg` | תמונת עבודה שלא מוצגת באתר, שמורה בצד |
 | `brand/Assistant-Bold.ttf` | פונט עברי סטטי — נדרש ליצירת תמונות השיתוף בלבד |
