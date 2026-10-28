@@ -117,10 +117,6 @@ export default function HeroSlideshow({ slides }: { slides: GalleryItem[] }) {
                 fill
                 sizes="(min-width: 768px) 45vw, 90vw"
                 priority={i === 0}
-                // Slightly harder compression than the gallery: this is the
-                // LCP image and the biggest single download on a phone, and
-                // it is seen at a glance rather than studied.
-                quality={62}
                 className="object-cover"
               />
             </motion.div>

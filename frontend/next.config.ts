@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import imageSizes from "./lib/image-sizes.json";
 
 const nextConfig: NextConfig = {
   // The site's own WhatsApp button lives in the bottom-left corner, which is
@@ -9,13 +10,15 @@ const nextConfig: NextConfig = {
   },
 
   images: {
-    // Photographs of events compress well as AVIF and it saves real bytes on
-    // an image-heavy page loaded mostly over mobile data.
-    formats: ["image/avif", "image/webp"],
-    // 62 is used for the hero slideshow, whose first frame is the page's LCP
-    // image and the single heaviest thing on a phone. 75 stays the default
-    // for the gallery, where photos are viewed closely.
-    qualities: [62, 75],
+    // Photos are resized once at build time (scripts/optimize-images.mjs)
+    // instead of on every request: on-request resizing kept ~500MB of memory
+    // busy on the server around the clock, which was most of the Railway bill.
+    // The loader points <Image> at the prepared files; the widths here must be
+    // the ones the script prepares, so both read the same list.
+    loader: "custom",
+    loaderFile: "./lib/image-loader.ts",
+    deviceSizes: imageSizes.deviceSizes,
+    imageSizes: imageSizes.imageSizes,
   },
 
   /*

@@ -11,14 +11,17 @@
     "start": "next start",
     "lint": "eslint",
     "check:images": "node scripts/check-images.mjs",
-    "prebuild": "node scripts/check-images.mjs"
+    "prebuild": "node scripts/check-images.mjs && node scripts/optimize-images.mjs",
+    "optimize:images": "node scripts/optimize-images.mjs",
+    "predev": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.43.0",
     "lucide-react": "^1.28.0",
     "next": "16.2.12",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
